@@ -2,9 +2,6 @@
 
 PORT = 9000
 DEBUG = True
-APP_NAME = 'sxuhelp'
-TITLE = 'sxuhelp'
-TEMPLATE = 'tornado'  # jinja2/mako/tornado
 
 #peewee
 BACKEND_MYSQL="mysql+pool://root:root@127.0.0.1/tornado?max_connections=20&stale_timeout=300"
