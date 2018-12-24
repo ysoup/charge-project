@@ -8,11 +8,12 @@ from sys import argv
 
 import config
 from handlers.basehandlers.basehandler import ErrorHandler
-from handlers.index import IndexHandler, LoginHandler
+from handlers.index import LoginHandler, ChatLoginHandler, UserInfoHandler
 
 handlers = [
-    (r'/', IndexHandler),
     (r'/login', LoginHandler),
+    (r'/chat_login', ChatLoginHandler),
+    (r'/user_info', UserInfoHandler),
 ]
 
 application = tornado.web.Application(
@@ -28,7 +29,7 @@ application = tornado.web.Application(
 config.app = application
 
 if __name__ == "__main__":
-    if len(argv) > 1 and  argv[1][:6] == '-port=':
+    if len(argv) > 1 and argv[1][:6] == '-port=':
         config.PORT = int(argv[1][6:])
 
     application.listen(config.PORT)

@@ -34,6 +34,7 @@ class Adv_BaseRequestHandler(BaseRequestHandler):
         if self._session:
             MongoSessionManager.update_session(self._session.get_session_id(),self._session)
 
+
 class Rate_BaseRequestHandler(BaseRequestHandler):
     '''
     redis:记录访问频率

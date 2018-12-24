@@ -1,10 +1,11 @@
 # coding:utf-8
 import sys
-import time,datetime
+import time, datetime
 from hashlib import md5
 from backend.mysql_model import BaseModel
 from peewee import *
 from utils.util import random_str
+
 
 class USER_LEVEL:
     BAN = 0
@@ -13,8 +14,8 @@ class USER_LEVEL:
 
 
 class User(BaseModel):
-    ROLE=(
-        (0,'administrator'),
+    ROLE = (
+        (0, 'administrator'),
     )
 
     #id = Column(Integer, primary_key=True, autoincrement=True)

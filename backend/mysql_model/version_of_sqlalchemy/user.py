@@ -7,7 +7,6 @@ from sqlalchemy import Column, Integer, BigInteger, String, Float, ForeignKey, B
 from utils.util import random_str
 
 
-
 class USER_LEVEL:
     BAN = 0
     NORMAL = 10
