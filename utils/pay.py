@@ -3,6 +3,8 @@ import hashlib
 import base64
 import json
 from Crypto.Cipher import AES
+from bs4 import *
+import config
 
 
 class WXBizDataCrypt:
@@ -18,8 +20,8 @@ class WXBizDataCrypt:
         print(encryptedData)
         iv = base64.b64decode(iv)
         print(iv)
-        cipher = AES.new(b'\x83=\x01\x97\xcdV\xda\xa8eR\x9dQ6\xf8\xbb\xb8', AES.MODE_CBC, b'\xcd6C\xa7\xf4\x14uF\xef\xc0\xf3\xbd\x95\x06s\xe0')
-        data = cipher.decrypt(b'\x1feD\xde,+]\xcf\x1c\xa8\xae\xc3H\xabb\xb5\x0c@\xc3\xf2\xffQ\x85\x8a\xad\xd4\x9b\x17@\x85r\x8c\x11\xf47\rJy\\\xde:\xbb\xedri"kp\xc8\x8a+\xae\x80\x90b\xee\xa4cg\x9e\x17D\x7f\xdf\xb2\xd5\x1f\x83\x98\x06.\x19\xd9\x9cJ\xf2\x95\xd6\xa8\xdbo-U\xe9\x05\xba\xc0K\x9fs3\xa4\xf0\xbf\xd9,T\xa9\xeaB\xa2\x13\xb7\xba/@\xf1U\x9eQ\xf6q\x08\x88w\x99\xa6\xa0\x183\xa4@\xb8\x95\x0f0Xf\xb2\x08\x07\x1a<\xca\xdfvc\xa5\xed\xc0y\xc1\x93\x05\x1bv\xa6\xddm)\xe4\xd4$\xeb\xf9\xf0')
+        cipher = AES.new(sessionKey, AES.MODE_CBC, iv)
+        data = cipher.decrypt(encryptedData)
 
         decrypted = json.loads(self._unpad(data))
 
@@ -30,6 +32,7 @@ class WXBizDataCrypt:
 
     def _unpad(self, s):
         val = s[:-ord(s[len(s) - 1:])]
+        print(val)
         if isinstance(val, bytes):
             val = val.decode()
         return val
@@ -80,7 +83,7 @@ def paysign(app_id, body, mch_id, nonce_str, notify_url, openid, out_trade_no, s
 
     # 处理函数，对参数按照key=value的格式，并按照参数名ASCII字典序排序
     stringA = '&'.join(["{0}={1}".format(k, ret.get(k)) for k in sorted(ret)])
-    stringSignTemp = '{0}&key={1}'.format(stringA, Mch_key)
+    stringSignTemp = '{0}&key={1}'.format(stringA, config.MCH_key)
     sign = hashlib.md5(stringSignTemp.encode("utf-8")).hexdigest()
     return sign.upper()
 
@@ -98,25 +101,27 @@ def getWxPayOrdrID():
 # 获取返回给小程序的paySign
 def get_paysign(prepay_id, timeStamp, nonceStr):
     pay_data = {
-        'appId': client_appid,
+        'appId': config.APP_ID,
         'nonceStr': nonceStr,
         'package': "prepay_id="+prepay_id,
         'signType': 'MD5',
         'timeStamp': timeStamp
     }
     stringA = '&'.join(["{0}={1}".format(k, pay_data.get(k))for k in sorted(pay_data)])
-    stringSignTemp = '{0}&key={1}'.format(stringA, Mch_key)
+    stringSignTemp = '{0}&key={1}'.format(stringA, config.MCH_key)
     sign = hashlib.md5(stringSignTemp.encode("utf-8")).hexdigest()
     return sign.upper()
 
 
 # 获取全部参数信息，封装成xml,传递过来的openid和客户端ip，和价格需要我们自己获取传递进来
 def get_bodyData(openid, client_ip, price):
-    body = 'Mytest'  # 商品描述
+    body = '充电桩'  # 商品描述
     notify_url = 'https:/.../'  # 填写支付成功的回调地址，微信确认支付成功会访问这个接口
     nonce_str = getNonceStr()  # 随机字符串
     out_trade_no = getWxPayOrdrID()  # 商户订单号
     total_fee = str(price)  # 订单价格，单位是 分
+    Mch_id = config.MCH_ID
+    client_appid = config.APP_ID
     # 获取签名
     sign = paysign(client_appid, body, Mch_id, nonce_str, notify_url, openid, out_trade_no, client_ip, total_fee)
 
@@ -137,5 +142,14 @@ def get_bodyData(openid, client_ip, price):
 
     return bodyData
 
+
+def trans_xml_to_dict(xml):
+    soup = BeautifulSoup(xml, features='xml')
+    xml = soup.find('xml')
+    if not xml:
+        return {}
+    # 将 XML 数据转化为 Dict
+    data = dict([(item.name, item.text) for item in xml.find_all()])
+    return data
 
 

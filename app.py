@@ -8,12 +8,13 @@ from sys import argv
 
 import config
 from handlers.basehandlers.basehandler import ErrorHandler
-from handlers.index import LoginHandler, ChatLoginHandler, UserInfoHandler
+from handlers.index import LoginHandler, ChatLoginHandler, UserInfoHandler, WeChatPayHandler
 
 handlers = [
     (r'/login', LoginHandler),
     (r'/chat_login', ChatLoginHandler),
     (r'/user_info', UserInfoHandler),
+    (r'/chat_pay', WeChatPayHandler),
 ]
 
 application = tornado.web.Application(
