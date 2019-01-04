@@ -1,5 +1,5 @@
-from aliyunsdkcore.profile.endpoint.resolvers.resolver import Resolver
-import aliyunsdkcore.profile.region_provider as user_config
+from sdk.ailiyun.aliyunsdkcore.profile.endpoint.resolvers.resolver import Resolver
+import sdk.ailiyun.aliyunsdkcore.profile.region_provider as user_config
 
 
 class UserConfigResolver(Resolver):

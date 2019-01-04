@@ -1,4 +1,4 @@
-from aliyunsdkcore.profile.endpoint.resolvers.resolver import Resolver
+from sdk.ailiyun.aliyunsdkcore.profile.endpoint.resolvers.resolver import Resolver
 
 
 class RequestDomainResolver(Resolver):

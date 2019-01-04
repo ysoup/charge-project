@@ -1,10 +1,10 @@
-from aliyunsdkcore.profile.endpoint.resolvers.local_global_resolver import LocalGlobalResolver
-from aliyunsdkcore.profile.endpoint.resolvers.local_regional_resolver import LocalRegionalResolver
-from aliyunsdkcore.profile.endpoint.resolvers.location_service_resolver import LocationServiceResolver
-from aliyunsdkcore.profile.endpoint.resolvers.request_domain_resolver import RequestDomainResolver
-from aliyunsdkcore.profile.endpoint.resolvers.user_config_resolver import UserConfigResolver
-from aliyunsdkcore.acs_exception.exceptions import ClientException
-from aliyunsdkcore.acs_exception import error_code, error_msg
+from sdk.ailiyun.aliyunsdkcore.profile.endpoint.resolvers.local_global_resolver import LocalGlobalResolver
+from sdk.ailiyun.aliyunsdkcore.profile.endpoint.resolvers.local_regional_resolver import LocalRegionalResolver
+from sdk.ailiyun.aliyunsdkcore.profile.endpoint.resolvers.location_service_resolver import LocationServiceResolver
+from sdk.ailiyun.aliyunsdkcore.profile.endpoint.resolvers.request_domain_resolver import RequestDomainResolver
+from sdk.ailiyun.aliyunsdkcore.profile.endpoint.resolvers.user_config_resolver import UserConfigResolver
+from sdk.ailiyun.aliyunsdkcore.acs_exception.exceptions import ClientException
+from sdk.ailiyun.aliyunsdkcore.acs_exception import error_code, error_msg
 
 # sort by priority
 resolvers = [

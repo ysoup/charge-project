@@ -17,11 +17,29 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from aliyunsdkcore.request import RpcRequest
-class QueryInterSmsIsoInfoRequest(RpcRequest):
+from sdk.ailiyun.aliyunsdkcore.request import RpcRequest
+class QuerySendDetailsRequest(RpcRequest):
 
 	def __init__(self):
-		RpcRequest.__init__(self, 'Dysmsapi', '2017-05-25', 'QueryInterSmsIsoInfo')
+		RpcRequest.__init__(self, 'Dysmsapi', '2017-05-25', 'QuerySendDetails')
+
+	def get_SendDate(self):
+		return self.get_query_params().get('SendDate')
+
+	def set_SendDate(self,SendDate):
+		self.add_query_param('SendDate',SendDate)
+
+	def get_PageSize(self):
+		return self.get_query_params().get('PageSize')
+
+	def set_PageSize(self,PageSize):
+		self.add_query_param('PageSize',PageSize)
+
+	def get_PhoneNumber(self):
+		return self.get_query_params().get('PhoneNumber')
+
+	def set_PhoneNumber(self,PhoneNumber):
+		self.add_query_param('PhoneNumber',PhoneNumber)
 
 	def get_ResourceOwnerAccount(self):
 		return self.get_query_params().get('ResourceOwnerAccount')
@@ -29,11 +47,17 @@ class QueryInterSmsIsoInfoRequest(RpcRequest):
 	def set_ResourceOwnerAccount(self,ResourceOwnerAccount):
 		self.add_query_param('ResourceOwnerAccount',ResourceOwnerAccount)
 
-	def get_CountryName(self):
-		return self.get_query_params().get('CountryName')
+	def get_CurrentPage(self):
+		return self.get_query_params().get('CurrentPage')
 
-	def set_CountryName(self,CountryName):
-		self.add_query_param('CountryName',CountryName)
+	def set_CurrentPage(self,CurrentPage):
+		self.add_query_param('CurrentPage',CurrentPage)
+
+	def get_BizId(self):
+		return self.get_query_params().get('BizId')
+
+	def set_BizId(self,BizId):
+		self.add_query_param('BizId',BizId)
 
 	def get_ResourceOwnerId(self):
 		return self.get_query_params().get('ResourceOwnerId')

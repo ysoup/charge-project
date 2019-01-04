@@ -17,29 +17,35 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from aliyunsdkcore.request import RpcRequest
-class QuerySendDetailsRequest(RpcRequest):
+from sdk.ailiyun.aliyunsdkcore.request import RpcRequest
+class SendInterSmsRequest(RpcRequest):
 
 	def __init__(self):
-		RpcRequest.__init__(self, 'Dysmsapi', '2017-05-25', 'QuerySendDetails')
+		RpcRequest.__init__(self, 'Dysmsapi', '2017-05-25', 'SendInterSms')
 
-	def get_SendDate(self):
-		return self.get_query_params().get('SendDate')
+	def get_TemplateCode(self):
+		return self.get_query_params().get('TemplateCode')
 
-	def set_SendDate(self,SendDate):
-		self.add_query_param('SendDate',SendDate)
+	def set_TemplateCode(self,TemplateCode):
+		self.add_query_param('TemplateCode',TemplateCode)
 
-	def get_PageSize(self):
-		return self.get_query_params().get('PageSize')
+	def get_PhoneNumbers(self):
+		return self.get_query_params().get('PhoneNumbers')
 
-	def set_PageSize(self,PageSize):
-		self.add_query_param('PageSize',PageSize)
+	def set_PhoneNumbers(self,PhoneNumbers):
+		self.add_query_param('PhoneNumbers',PhoneNumbers)
 
-	def get_PhoneNumber(self):
-		return self.get_query_params().get('PhoneNumber')
+	def get_CountryCode(self):
+		return self.get_query_params().get('CountryCode')
 
-	def set_PhoneNumber(self,PhoneNumber):
-		self.add_query_param('PhoneNumber',PhoneNumber)
+	def set_CountryCode(self,CountryCode):
+		self.add_query_param('CountryCode',CountryCode)
+
+	def get_SignName(self):
+		return self.get_query_params().get('SignName')
+
+	def set_SignName(self,SignName):
+		self.add_query_param('SignName',SignName)
 
 	def get_ResourceOwnerAccount(self):
 		return self.get_query_params().get('ResourceOwnerAccount')
@@ -47,17 +53,11 @@ class QuerySendDetailsRequest(RpcRequest):
 	def set_ResourceOwnerAccount(self,ResourceOwnerAccount):
 		self.add_query_param('ResourceOwnerAccount',ResourceOwnerAccount)
 
-	def get_CurrentPage(self):
-		return self.get_query_params().get('CurrentPage')
+	def get_TemplateParam(self):
+		return self.get_query_params().get('TemplateParam')
 
-	def set_CurrentPage(self,CurrentPage):
-		self.add_query_param('CurrentPage',CurrentPage)
-
-	def get_BizId(self):
-		return self.get_query_params().get('BizId')
-
-	def set_BizId(self,BizId):
-		self.add_query_param('BizId',BizId)
+	def set_TemplateParam(self,TemplateParam):
+		self.add_query_param('TemplateParam',TemplateParam)
 
 	def get_ResourceOwnerId(self):
 		return self.get_query_params().get('ResourceOwnerId')
@@ -70,3 +70,9 @@ class QuerySendDetailsRequest(RpcRequest):
 
 	def set_OwnerId(self,OwnerId):
 		self.add_query_param('OwnerId',OwnerId)
+
+	def get_OutId(self):
+		return self.get_query_params().get('OutId')
+
+	def set_OutId(self,OutId):
+		self.add_query_param('OutId',OutId)

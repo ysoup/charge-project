@@ -31,6 +31,7 @@ DOMAIN = "dysmsapi.aliyuncs.com"
 acs_client = AcsClient(const.ACCESS_KEY_ID, const.ACCESS_KEY_SECRET, REGION)
 region_provider.add_endpoint(PRODUCT_NAME, REGION, DOMAIN)
 
+
 def send_sms(business_id, phone_numbers, sign_name, template_code, template_param=None):
     smsRequest = SendSmsRequest.SendSmsRequest()
     # 申请的短信模板编码,必填
@@ -69,7 +70,7 @@ if __name__ == '__main__':
     #print(__business_id)
     params = "{\"code\":\"12345\",\"product\":\"云通信\"}"
 	#params = u'{"name":"wqb","code":"12345678","address":"bz","phone":"13000000000"}'
-    print(send_sms(__business_id, "13000000000", "云通信测试", "SMS_5250008", params))
+    print(send_sms(__business_id, "18310029092", "云通信测试", "SMS_5250008", params))
    
     
     

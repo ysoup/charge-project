@@ -1,5 +1,5 @@
-from aliyunsdkcore.profile.endpoint.resolvers.resolver import Resolver
-import aliyunsdkcore.profile.endpoint.endpoint_profile as endpoint_profile
+from sdk.ailiyun.aliyunsdkcore.profile.endpoint.resolvers.resolver import Resolver
+import sdk.ailiyun.aliyunsdkcore.profile.endpoint.endpoint_profile as endpoint_profile
 
 
 class LocationServiceResolver(Resolver):

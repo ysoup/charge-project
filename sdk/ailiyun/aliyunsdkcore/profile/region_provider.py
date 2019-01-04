@@ -21,8 +21,8 @@
 
 import os
 
-from aliyunsdkcore.acs_exception import error_code, error_msg
-from aliyunsdkcore.acs_exception.exceptions import ClientException
+from sdk.ailiyun.aliyunsdkcore.acs_exception import error_code, error_msg
+from sdk.ailiyun.aliyunsdkcore.acs_exception.exceptions import ClientException
 from xml.dom.minidom import parse
 from ..profile import location_service
 

@@ -27,17 +27,17 @@ try:
 except ImportError:
     import simplejson as json
 
-from aliyunsdkcore.profile import region_provider
-from aliyunsdkcore.profile.location_service import LocationService
-from aliyunsdkcore.acs_exception.exceptions import ClientException
-from aliyunsdkcore.acs_exception.exceptions import ServerException
-from aliyunsdkcore.acs_exception import error_code, error_msg
-from aliyunsdkcore.http.http_response import HttpResponse
-from aliyunsdkcore.request import AcsRequest
-from aliyunsdkcore.http import format_type
-from aliyunsdkcore.auth.signers.signer_factory import SignerFactory
-from aliyunsdkcore.request import CommonRequest
-from aliyunsdkcore.profile.endpoint import endpoint_resolver
+from sdk.ailiyun.aliyunsdkcore.profile import region_provider
+from sdk.ailiyun.aliyunsdkcore.profile.location_service import LocationService
+from sdk.ailiyun.aliyunsdkcore.acs_exception.exceptions import ClientException
+from sdk.ailiyun.aliyunsdkcore.acs_exception.exceptions import ServerException
+from sdk.ailiyun.aliyunsdkcore.acs_exception import error_code, error_msg
+from sdk.ailiyun.aliyunsdkcore.http.http_response import HttpResponse
+from sdk.ailiyun.aliyunsdkcore.request import AcsRequest
+from sdk.ailiyun.aliyunsdkcore.http import format_type
+from sdk.ailiyun.aliyunsdkcore.auth.signers.signer_factory import SignerFactory
+from sdk.ailiyun.aliyunsdkcore.request import CommonRequest
+from sdk.ailiyun.aliyunsdkcore.profile.endpoint import endpoint_resolver
 
 
 """

@@ -17,7 +17,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from aliyunsdkcore.request import RpcRequest
+from sdk.ailiyun.aliyunsdkcore.request import RpcRequest
 class SendSmsRequest(RpcRequest):
 
 	def __init__(self):
