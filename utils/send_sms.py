@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from sdk.dysms_python.aliyunsdkdysmsapi.request.v20170525 import SendSmsRequest, QuerySendDetailsRequest
-from aliyunsdkcore.client import AcsClient
+from sdk.ailiyun.aliyunsdkdysmsapi.request.v20170525 import SendSmsRequest
+from sdk.ailiyun.aliyunsdkdysmsapi.request.v20170525 import QuerySendDetailsRequest
+from sdk.ailiyun.aliyunsdkcore.client import AcsClient
+from sdk.ailiyun.aliyunsdkcore.profile import region_provider
 import uuid
-from aliyunsdkcore.profile import region_provider
+
+
 
 """
 短信业务调用接口示例，版本号：v20170525
@@ -18,15 +21,15 @@ PRODUCT_NAME = "Dysmsapi"
 DOMAIN = "dysmsapi.aliyuncs.com"
 
 # ACCESS_KEY_ID/ACCESS_KEY_SECRET 根据实际申请的账号信息进行替换
-ACCESS_KEY_ID = "LTAIBzbid9VCYxCP"
-ACCESS_KEY_SECRET = "HGUp2EX3RRTHHvE05mVkYyHpgFfzHW"
-AIBILINK_SIGN_NAME = u"爱必投"
-AIBICOIN_SIGN_NAME = u"通证星球"
+ACCESS_KEY_ID = "LTAIn1qaaa9jFY5H"
+ACCESS_KEY_SECRET = "1iKJsKjaUhxWrCdXERfiTa0UJFOldI"
+CHARGE_SIGN_NAME = u"鼎天新能源"
 
 acs_client = AcsClient(ACCESS_KEY_ID, ACCESS_KEY_SECRET, REGION)
 region_provider.add_endpoint(PRODUCT_NAME,REGION,DOMAIN)
 
-def send_sms_code(business_id, phone_numbers, template_code, template_param=None, sign_name = AIBILINK_SIGN_NAME):
+
+def send_sms_code(business_id, phone_numbers, template_code, template_param=None, sign_name=CHARGE_SIGN_NAME):
     smsRequest = SendSmsRequest.SendSmsRequest()
     # 申请的短信模板编码,必填
     smsRequest.set_TemplateCode(template_code)
@@ -39,7 +42,7 @@ def send_sms_code(business_id, phone_numbers, template_code, template_param=None
     smsRequest.set_OutId(business_id)
 
     # 短信签名
-    smsRequest.set_SignName(sign_name);
+    smsRequest.set_SignName(sign_name)
 
     # 短信发送的号码列表，必填。
     smsRequest.set_PhoneNumbers(phone_numbers)
@@ -76,8 +79,5 @@ def query_send_detail(biz_id, phone_number, page_size, current_page, send_date):
 if __name__ == '__main__':
     __business_id = uuid.uuid1()
     print(__business_id)
-    params = "{\"code\":\"12345\",}"
-    print(send_sms_code(__business_id, "18810861706", "SMS_144455104", params, sign_name="通证星球"))
-
-# if __name__ == 'query':
-#     print query_send_detail("1234567^8901234", "13000000000", 10, 1, "20170612")
+    params = "{\"code\":\"67890\",}"
+    print(send_sms_code(__business_id, "18310029092", "SMS_153725691", params, sign_name="鼎天新能源"))
