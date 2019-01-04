@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sdk.ailiyun.aliyunsdkdysmsapi.request.v20170525 import SendSmsRequest
-from sdk.ailiyun.aliyunsdkdysmsapi.request.v20170525 import QuerySendDetailsRequest
+from sdk.ailiyun.aliyunsdkdysmsapi.request.v20170525 import SendSmsRequest, QuerySendDetailsRequest
 from sdk.ailiyun.aliyunsdkcore.client import AcsClient
 from sdk.ailiyun.aliyunsdkcore.profile import region_provider
 import uuid
@@ -26,7 +25,7 @@ ACCESS_KEY_SECRET = "1iKJsKjaUhxWrCdXERfiTa0UJFOldI"
 CHARGE_SIGN_NAME = u"鼎天新能源"
 
 acs_client = AcsClient(ACCESS_KEY_ID, ACCESS_KEY_SECRET, REGION)
-region_provider.add_endpoint(PRODUCT_NAME,REGION,DOMAIN)
+region_provider.add_endpoint(PRODUCT_NAME, REGION, DOMAIN)
 
 
 def send_sms_code(business_id, phone_numbers, template_code, template_param=None, sign_name=CHARGE_SIGN_NAME):
@@ -79,5 +78,5 @@ def query_send_detail(biz_id, phone_number, page_size, current_page, send_date):
 if __name__ == '__main__':
     __business_id = uuid.uuid1()
     print(__business_id)
-    params = "{\"code\":\"67890\",}"
+    params = "{\"code\":\"57890\",}"
     print(send_sms_code(__business_id, "18310029092", "SMS_153725691", params, sign_name="鼎天新能源"))

@@ -128,3 +128,11 @@ def json_result(code, data):
     else:
         result = {'code': code, 'data': data}
     return json.dumps(result, default=str)
+
+
+def generate_number_code(len = 4):
+    ''' 随机生成4位的验证码 '''
+    verification_code = ''
+    for i in range(len):
+        verification_code = verification_code + str(random.randint(1, 9))
+    return verification_code

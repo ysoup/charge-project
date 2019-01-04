@@ -7,10 +7,11 @@ from backend.mysql_model.charge import *
 from playhouse.shortcuts import model_to_dict
 from handlers.basehandlers.basehandler import BaseRequestHandler
 
-from utils.util import json_result, login_required
-from utils.util import get_cleaned_query_data
+from utils.util import *
 from utils.pay import *
+from utils.send_sms import *
 import config
+import json
 
 # class LoginHandler(BaseRequestHandler):
 #
@@ -104,6 +105,53 @@ class LoginHandler(BaseRequestHandler):
         self.write(result)
 
 
+# 发送短信
+class SmsHandler(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        data = get_cleaned_query_data(self, ['mobile_no'])
+
+        business_id = uuid.uuid1()
+        phone_numbers = data["mobile_no"]
+        template_code = "SMS_153725691"
+        smscode = str(generate_number_code())
+        param = "{\"code\":\"%s\"}" % smscode
+
+        result = send_sms_code(business_id=business_id,
+                               phone_numbers=phone_numbers,
+                               template_code=template_code,
+                               template_param=param)
+        result = json.loads(result)
+        if result["Message"] == "OK":
+            info = MobileCheckCode.select().where(MobileCheckCode.mobile_no == data["mobile_no"]).first()
+            if info:
+                MobileCheckCode.update(code=smscode).where(MobileCheckCode.mobile_no == data["mobile_no"]).execute()
+            else:
+                MobileCheckCode.create(
+                    mobile_no=data["mobile_no"],
+                    code=smscode
+                )
+            result = json_result(0, "发送成功")
+        else:
+            result = json_result(1, "发送失败")
+        self.write(result)
+
+    def post(self, *args, **kwargs):
+        data = get_cleaned_query_data(self, ['mobile_no', "code"])
+        info = MobileCheckCode.select().where(MobileCheckCode.mobile_no == data["mobile_no"],
+                                              MobileCheckCode["code"] == data["code"]).first()
+        if info:
+            result = json_result(0, "校验成功")
+        else:
+            result = json_result(1, "校验失败")
+        self.write(result)
+
+
+# 用户登录
+class LoginHandler(BaseRequestHandler):
+    def post(self, *args, **kwargs):
+        data = get_cleaned_query_data(self, ['mobile_no'])
+
+
 # 用户基本信息
 class UserInfoHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
@@ -160,6 +208,8 @@ class WeChatPayHandler(BaseRequestHandler):
         else:
             result = json_result(-1, "请求支付失败")
             self.write(result)
+
+
 
 
 

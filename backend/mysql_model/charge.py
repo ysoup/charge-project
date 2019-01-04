@@ -26,6 +26,17 @@ class ChargeStation(BaseModel):
     class Meta:
         table_name = 'charge_station'
 
+
+class MobileCheckCode(BaseModel):
+    code = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+    mobile_no = CharField(constraints=[SQL("DEFAULT ''")], null=True, unique=True)
+    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+
+    class Meta:
+        table_name = 'mobile_check_code'
+
+
 class UseInfo(BaseModel):
     birth_day = CharField(constraints=[SQL("DEFAULT ''")], null=True)
     create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
