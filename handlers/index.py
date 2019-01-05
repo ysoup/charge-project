@@ -14,6 +14,11 @@ import config
 import json
 from backend.redis_db import *
 from decimal import *
+import logging
+
+
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+logging.basicConfig(filename='my.log', level=logging.DEBUG, format=LOG_FORMAT)
 # class LoginHandler(BaseRequestHandler):
 #
 #     def get(self, *args, **kwargs):

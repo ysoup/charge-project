@@ -215,7 +215,7 @@ class AcsClient:
 
 
         # add core version
-        core_version = __import__('aliyunsdkcore').__version__
+        core_version = "2.9.0"
         request.add_header('x-sdk-core-version', core_version)
 
         if isinstance(request, CommonRequest):
