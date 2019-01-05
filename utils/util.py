@@ -7,6 +7,7 @@ from tornado.web import HTTPError
 import functools
 from urllib.parse import urlencode
 import urllib.parse as urlparse
+from backend.redis_db import *
 
 
 class RequestArgumentError(Exception):
@@ -97,20 +98,31 @@ def login_required(method):
     '''
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
-        if not self.current_user:
-            if self.request.method in ("GET", "HEAD"):
-                url = self.get_login_url()
-                if "?" not in url:
-                    if urlparse.urlsplit(url).scheme:
-                        # if login url is absolute, make next absolute too
-                        next_url = self.request.full_url()
-                    else:
-                        next_url = self.request.uri
-                    url += "?" + urlencode(dict(next=next_url))
-                self.redirect(url)
-                return
-            raise HTTPError(403)
-        return method(self, *args, **kwargs)
+        headers = self.request.headers
+        authorization = headers["Authorization"]
+        data = self.request.arguments
+        if data.__contains__("user_no"):
+            cache_auth = db_redis.get("user_token_info_%s" % (str(data["user_no"][0], encoding="utf-8")))
+            cache_auth = str(cache_auth, encoding="utf-8") if cache_auth else None
+            if cache_auth != authorization:
+                return self.write("You have no access!")
+            else:
+                return method(self, *args, **kwargs)
+        else:
+            return self.write("You have no access!")
+        # if not self.current_user:
+        #     if self.request.method in ("GET", "HEAD"):
+        #         url = self.get_login_url()
+        #         if "?" not in url:
+        #             if urlparse.urlsplit(url).scheme:
+        #                 # if login url is absolute, make next absolute too
+        #                 next_url = self.request.full_url()
+        #             else:
+        #                 next_url = self.request.uri
+        #             url += "?" + urlencode(dict(next=next_url))
+        #         self.redirect(url)
+        #         return
+        #     raise HTTPError(403)
     return wrapper
 
 
@@ -136,3 +148,21 @@ def generate_number_code(len = 4):
     for i in range(len):
         verification_code = verification_code + str(random.randint(1, 9))
     return verification_code
+
+
+def trans_xml_to_dict(xml):
+    """
+    将微信支付交互返回的 XML 格式数据转化为 Python Dict 对象
+
+    :param xml: 原始 XML 格式数据
+    :return: dict 对象
+    """
+
+    soup = BeautifulSoup(xml, features='xml')
+    xml = soup.find('xml')
+    if not xml:
+        return {}
+
+    # 将 XML 数据转化为 Dict
+    data = dict([(item.name, item.text) for item in xml.find_all()])
+    return data

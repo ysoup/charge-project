@@ -6,13 +6,14 @@ import hmac
 from backend.mysql_model.charge import *
 from playhouse.shortcuts import model_to_dict
 from handlers.basehandlers.basehandler import BaseRequestHandler
-
+from .auth import Auth
 from utils.util import *
 from utils.pay import *
 from utils.send_sms import *
 import config
 import json
-
+from backend.redis_db import *
+from decimal import *
 # class LoginHandler(BaseRequestHandler):
 #
 #     def get(self, *args, **kwargs):
@@ -147,13 +148,44 @@ class SmsHandler(BaseRequestHandler):
 
 
 # 用户登录
-class LoginHandler(BaseRequestHandler):
+class UserLoginHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         data = get_cleaned_query_data(self, ['mobile_no'])
+
+        use_info = UseInfo.select().where(UseInfo.mobile_no == data["mobile_no"], UseInfo.use_type == 0).first()
+        if use_info:
+            user_no = use_info.user_no
+        else:
+            unique = uuid.uuid4()
+            user_no = hmac.new(unique.bytes, digestmod="sha1").hexdigest()
+            UseInfo.create(
+                user_no=user_no,
+                mobile_no=data["mobile_no"],
+                use_type=0
+            )
+        # token 生成
+        token = Auth.encode_auth_token(user_no, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+        self.set_header("Authorization", token)
+        db_redis.set("user_token_info_%s" % user_no, token)
+
+        result = json_result(0, {"user_no": user_no})
+        self.write(result)
+
+
+# 用户登出
+class LoginOutHandler(BaseRequestHandler):
+    @login_required
+    def post(self, *args, **kwargs):
+        data = get_cleaned_query_data(self, ['user_no'])
+        db_redis.delete("user_token_info_%s" % data["user_no"])
+        result = json_result(0, "退出成功")
+        self.write(result)
 
 
 # 用户基本信息
 class UserInfoHandler(BaseRequestHandler):
+    @login_required
     def get(self, *args, **kwargs):
         data = get_cleaned_query_data(self, ['user_no'])
         use_info = UseInfo.select().where(UseInfo.user_no == data["user_no"]).first()
@@ -165,23 +197,27 @@ class UserInfoHandler(BaseRequestHandler):
 
 # 微信支付
 class WeChatPayHandler(BaseRequestHandler):
+    @login_required
     def post(self, *args, **kwargs):
-        data = get_cleaned_query_data(self, ['fee'])
+        data = get_cleaned_query_data(self, ['fee', "code", "user_no"])
 
         client_ip, port = self.request.host.split(":")
         # 获取小程序openid
 
-        # openid_url = "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code" % (
-        #     APP_ID, APP_KEY, "033IIAzP0ZK0E42bexxP0LYLzP0IIAzW")
-        # req = requests.get(openid_url)
-        # rep = req.json()
-        # openid = rep["openid"]
-        openid = "ofutN5WvOP4O5YPxrPOf-Iz9wHuA"
+        openid_url = "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code" % (
+            APP_ID, APP_KEY, "033IIAzP0ZK0E42bexxP0LYLzP0IIAzW")
+        req = requests.get(openid_url)
+        rep = req.json()
+        openid = rep["openid"]
+        # openid = "ofutN5WvOP4O5YPxrPOf-Iz9wHuA"
         # 请求微信的url
         url = "https://api.mch.weixin.qq.com/pay/unifiedorder"
 
+        # 生成订单编号
+        order_id = getWxPayOrdrID()
+
         # 拿到封装好的xml数据
-        body_data = get_bodyData(openid, client_ip, data["fee"])
+        body_data = get_bodyData(openid, client_ip, data["fee"], order_id)
 
         # 获取时间戳
         timeStamp = str(int(time.time()))
@@ -193,6 +229,13 @@ class WeChatPayHandler(BaseRequestHandler):
         content = trans_xml_to_dict(respone.content)
 
         if content["return_code"] == 'SUCCESS':
+            PayOrderDetails.create(
+                user_no=data["user_no"],
+                order_no=order_id,
+                pay_fee=str(data["fee"]),
+                pay_type=0,
+                pay_status=0
+            )
             # 获取预支付交易会话标识
             prepay_id = content.get("prepay_id")
             # 获取随机字符串
@@ -206,8 +249,63 @@ class WeChatPayHandler(BaseRequestHandler):
             result = json_result(0, data)
             self.write(result)
         else:
+            PayOrderDetails.create(
+                user_no=data["user_no"],
+                order_no=order_id,
+                pay_fee=str(data["fee"]),
+                pay_type=0,
+                pay_status=0
+            )
             result = json_result(-1, "请求支付失败")
             self.write(result)
+
+
+# 微信支付通知
+class PayNotifyHandler(BaseRequestHandler):
+    def post(self, *args, **kwargs):
+        data = self.request.body
+        data = str(data, encoding="utf-8")
+        dic = trans_xml_to_dict(data)
+        if dic.__contains__("out_trade_no"):
+            order_id = dic["out_trade_no"]
+            order_info = PayOrderDetails.select().where(PayOrderDetails.order_no == order_id).first()
+            if order_info:
+                # 更新订单
+                PayOrderDetails.update(pay_status=1).where(PayOrderDetails.order_no == order_id).execute()
+                # 更新账户
+                account_info = AccountInfo.select().where(AccountInfo.user_no == order_info.user_no).first()
+                total_fee = Decimal(dic["total_fee"])
+                if account_info:
+                    total_amount = total_fee + account_info.total_amount
+                    AccountInfo.update(total_amount=total_amount).where(AccountInfo.id == account_info.id).execute()
+                else:
+                    AccountInfo.create(
+                        user_no=order_info.user_no,
+                        total_amount=total_fee
+                    )
+                ret_dict = {
+                    'return_code': 'SUCCESS',
+                    'return_msg': 'OK',
+                }
+                ret_xml = trans_dict_to_xml(ret_dict)
+                self.write(ret_xml)
+        else:
+            ret_dict = {
+                'return_code': 'FAIL',
+                'return_msg': 'verify error',
+            }
+
+            ret_xml = trans_dict_to_xml(ret_dict)
+            self.write(ret_xml)
+
+
+#
+
+
+
+
+
+
 
 
 

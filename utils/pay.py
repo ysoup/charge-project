@@ -114,11 +114,11 @@ def get_paysign(prepay_id, timeStamp, nonceStr):
 
 
 # 获取全部参数信息，封装成xml,传递过来的openid和客户端ip，和价格需要我们自己获取传递进来
-def get_bodyData(openid, client_ip, price):
+def get_bodyData(openid, client_ip, price, order_id):
     body = '充电桩'  # 商品描述
     notify_url = 'https:/.../'  # 填写支付成功的回调地址，微信确认支付成功会访问这个接口
     nonce_str = getNonceStr()  # 随机字符串
-    out_trade_no = getWxPayOrdrID()  # 商户订单号
+    out_trade_no = order_id  # 商户订单号
     total_fee = str(price)  # 订单价格，单位是 分
     Mch_id = config.MCH_ID
     client_appid = config.APP_ID
@@ -152,4 +152,20 @@ def trans_xml_to_dict(xml):
     data = dict([(item.name, item.text) for item in xml.find_all()])
     return data
 
+
+def trans_dict_to_xml(data):
+    """
+    将 dict 对象转换成微信支付交互所需的 XML 格式数据
+
+    :param data: dict 对象
+    :return: xml 格式数据
+    """
+
+    xml = []
+    for k in sorted(data.keys()):
+        v = data.get(k)
+        if k == 'detail' and not v.startswith('<![CDATA['):
+            v = '<![CDATA[{}]]>'.format(v)
+        xml.append('<{key}>{value}</{key}>'.format(key=k, value=v))
+    return '<xml>{}</xml>'.format(''.join(xml))
 

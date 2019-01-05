@@ -7,6 +7,16 @@ from peewee import *
 from utils.util import random_str
 
 
+class AccountInfo(BaseModel):
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+    total_amount = DecimalField(constraints=[SQL("DEFAULT 0.0000")])
+    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+    user_no = CharField(constraints=[SQL("DEFAULT ''")])
+
+    class Meta:
+        table_name = 'account_info'
+
+
 class ChargeStation(BaseModel):
     auxiliary_source = IntegerField(null=True)
     business_hours = IntegerField(null=True)
@@ -35,6 +45,19 @@ class MobileCheckCode(BaseModel):
 
     class Meta:
         table_name = 'mobile_check_code'
+
+
+class PayOrderDetails(BaseModel):
+    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+    order_no = CharField(constraints=[SQL("DEFAULT ''")])
+    pay_fee = CharField(constraints=[SQL("DEFAULT ''")], null=True)
+    pay_status = CharField(constraints=[SQL("DEFAULT '0'")], null=True)
+    pay_type = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+    user_no = CharField(constraints=[SQL("DEFAULT ''")])
+
+    class Meta:
+        table_name = 'pay_order_details'
 
 
 class UseInfo(BaseModel):
