@@ -18,7 +18,7 @@
 # coding=utf-8
 
 from sdk.ailiyun.aliyunsdkcore.auth.algorithm import sha_hmac1 as mac1
-import sdk.ailiyun.urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.parse, urllib.error
 from sdk.ailiyun.aliyunsdkcore.utils import parameter_helper as helper
 
 
