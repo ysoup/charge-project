@@ -29,9 +29,9 @@ from .auth.composer import rpc_signature_composer as rpc_signer
 from .auth.composer import roa_signature_composer as roa_signer
 from .auth.composer import oss_signature_composer as oss_signer
 from .auth.utils import md5_tool
-from aliyunsdkcore.auth.algorithm import sha_hmac1
-from aliyunsdkcore.acs_exception import exceptions
-from aliyunsdkcore.acs_exception import error_code
+from sdk.ailiyun.aliyunsdkcore.auth.algorithm import sha_hmac1
+from sdk.ailiyun.aliyunsdkcore.acs_exception import exceptions
+from sdk.ailiyun.aliyunsdkcore.acs_exception import error_code
 import abc
 
 """
