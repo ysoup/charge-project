@@ -24,7 +24,7 @@ import json
 import urllib.request, urllib.error, urllib.parse
 import logging
 
-from aliyunsdkcore.auth.signers.signer import Signer
+from sdk.ailiyun.aliyunsdkcore.auth.signers.signer import Signer
 
 
 class EcsRamRoleSigner(Signer):

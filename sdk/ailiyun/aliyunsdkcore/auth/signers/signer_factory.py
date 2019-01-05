@@ -22,10 +22,10 @@
 
 import logging
 import os
-from aliyunsdkcore.acs_exception import error_msg
-from aliyunsdkcore.acs_exception import error_code
-from aliyunsdkcore.acs_exception import exceptions
-from aliyunsdkcore.auth import credentials
+from sdk.ailiyun.aliyunsdkcore.acs_exception import error_msg
+from sdk.ailiyun.aliyunsdkcore.acs_exception import error_code
+from sdk.ailiyun.aliyunsdkcore.acs_exception import exceptions
+from sdk.ailiyun.aliyunsdkcore.auth import credentials
 from . import access_key_signer
 from . import sts_token_signer
 from . import ram_role_arn_signer

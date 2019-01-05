@@ -18,8 +18,8 @@
 # coding=utf-8
 
 from . import roa_signature_composer
-from aliyunsdkcore.auth.algorithm import sha_hmac1 as mac1
-from aliyunsdkcore.utils import parameter_helper as helper
+from sdk.ailiyun.aliyunsdkcore.auth.algorithm import sha_hmac1 as mac1
+from sdk.ailiyun.aliyunsdkcore.utils import parameter_helper as helper
 import urllib.request, urllib.parse, urllib.error
 
 ACCEPT = "Accept"

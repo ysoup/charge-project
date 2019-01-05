@@ -22,13 +22,13 @@
 import time
 import json
 
-from aliyunsdkcore.auth.signers.signer import Signer
-from aliyunsdkcore.auth.signers.access_key_signer import AccessKeySigner
-from aliyunsdkcore.acs_exception import error_code
-from aliyunsdkcore.acs_exception import exceptions
-from aliyunsdkcore.auth.credentials import RamRoleArnCredential
-from aliyunsdkcore.auth.credentials import AccessKeyCredential
-from aliyunsdkcore.request import CommonRequest
+from sdk.ailiyun.aliyunsdkcore.auth.signers.signer import Signer
+from sdk.ailiyun.aliyunsdkcore.auth.signers.access_key_signer import AccessKeySigner
+from sdk.ailiyun.aliyunsdkcore.acs_exception import error_code
+from sdk.ailiyun.aliyunsdkcore.acs_exception import exceptions
+from sdk.ailiyun.aliyunsdkcore.auth.credentials import RamRoleArnCredential
+from sdk.ailiyun.aliyunsdkcore.auth.credentials import AccessKeyCredential
+from sdk.ailiyun.aliyunsdkcore.request import CommonRequest
 
 
 class RamRoleArnSigner(Signer):

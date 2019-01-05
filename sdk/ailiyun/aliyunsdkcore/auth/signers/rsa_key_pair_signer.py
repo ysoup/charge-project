@@ -26,12 +26,12 @@ import json
 import logging
 import socket
 
-from aliyunsdkcore.auth.signers.signer import Signer
-from aliyunsdkcore.acs_exception import error_code
-from aliyunsdkcore.acs_exception import error_msg
-from aliyunsdkcore.acs_exception import exceptions
-from aliyunsdkcore.request import RpcRequest
-from aliyunsdkcore.auth.algorithm import sha_hmac256
+from sdk.ailiyun.aliyunsdkcore.auth.signers.signer import Signer
+from sdk.ailiyun.aliyunsdkcore.acs_exception import error_code
+from sdk.ailiyun.aliyunsdkcore.acs_exception import error_msg
+from sdk.ailiyun.aliyunsdkcore.acs_exception import exceptions
+from sdk.ailiyun.aliyunsdkcore.request import RpcRequest
+from sdk.ailiyun.aliyunsdkcore.auth.algorithm import sha_hmac256
 
 
 class RsaKeyPairSigner(Signer):

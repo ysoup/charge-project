@@ -19,8 +19,8 @@
 
 import base64
 import platform
-from aliyunsdkcore.acs_exception import exceptions
-from aliyunsdkcore.acs_exception import error_code
+from sdk.ailiyun.aliyunsdkcore.acs_exception import exceptions
+from sdk.ailiyun.aliyunsdkcore.acs_exception import error_code
 
 
 

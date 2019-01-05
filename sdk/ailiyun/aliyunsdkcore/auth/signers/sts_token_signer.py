@@ -19,7 +19,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from aliyunsdkcore.auth.signers.signer import Signer
+from sdk.ailiyun.aliyunsdkcore.auth.signers.signer import Signer
 
 
 class StsTokenSigner(Signer):
