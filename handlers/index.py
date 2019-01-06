@@ -210,7 +210,7 @@ class UserInfoHandler(BaseRequestHandler):
 class WeChatPayHandler(BaseRequestHandler):
     @login_required
     def post(self, *args, **kwargs):
-        data = get_cleaned_query_data(self, ['fee', "code", "user_no"])
+        data = get_cleaned_post_data(self, ['fee', "code", "user_no"])
 
         client_ip, port = self.request.host.split(":")
         # 获取小程序openid
@@ -276,14 +276,18 @@ class PayNotifyHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         data = self.request.body
         data = str(data, encoding="utf-8")
+        logging.info("微信支付通知")
         dic = trans_xml_to_dict(data)
         if dic.__contains__("out_trade_no"):
             order_id = dic["out_trade_no"]
+            logging.info("微信支付订单号:%s" % order_id)
             order_info = PayOrderDetails.select().where(PayOrderDetails.order_no == order_id).first()
             if order_info:
                 # 更新订单
+                logging.info("微信支付修改支付状态")
                 PayOrderDetails.update(pay_status=1).where(PayOrderDetails.order_no == order_id).execute()
                 # 更新账户
+                logging.info("微信支付当前用户:%s" % order_info.user_no)
                 account_info = AccountInfo.select().where(AccountInfo.user_no == order_info.user_no).first()
                 total_fee = Decimal(dic["total_fee"])
                 if account_info:
@@ -312,6 +316,7 @@ class PayNotifyHandler(BaseRequestHandler):
 
 # 获取电桩信息
 class ChargeStationHandler(BaseRequestHandler):
+    # @login_required
     def get(self, *args, **kwargs):
         data = get_cleaned_query_data(self, ["qr_code", "user_no"])
         station_info = ChargeStation.select().where(ChargeStation.qr_code == data["qr_code"]).first()
@@ -320,6 +325,12 @@ class ChargeStationHandler(BaseRequestHandler):
             dic = model_to_dict(station_info)
         result = json_result(0, dic)
         self.write(result)
+
+    def post(self, *args, **kwargs):
+        data = get_cleaned_post_data(self, ["stake_no", "spear_no", "qr_code", "user_no"])
+
+        # 发送充电队列
+        db_redis.lpush()
 
 
 
