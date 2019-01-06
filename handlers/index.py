@@ -212,6 +212,10 @@ class WeChatPayHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         data = get_cleaned_post_data(self, ['fee', "code", "user_no"])
         logging.info("威信支付:ip %s" % self.request.headers)
+        logging.info("威信支付:ip %s" % self.request.remote_ip)
+        logging.info("威信支付:ip %s" % self.request.host)
+        logging.info("威信支付:ip %s" % self.request.headers)
+
         client_ip, port = self.request.host.split(":")
         # 获取小程序openid
 
