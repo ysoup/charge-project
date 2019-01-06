@@ -333,6 +333,9 @@ class ChargeStationHandler(BaseRequestHandler):
     # @login_required
     def post(self, *args, **kwargs):
         data = get_cleaned_post_data(self, ["stake_no", "spear_no", "qr_code", "user_no"])
+        # 查询账余额
+        account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
+        amount = account_info.total_amount
         # 查询当前用户编号
         user_info = UseInfo.select().where(UseInfo.user_no == data["user_no"]).first()
         uid = user_info.id
@@ -346,7 +349,9 @@ class ChargeStationHandler(BaseRequestHandler):
             "spear_no": data["spear_no"],
             "uid": uid,
             "calcno": calcno,
-            "user_no": data["user_no"]
+            "user_no": data["user_no"],
+            "amount": str(amount).split(".")[0],
+            "price": "150"
         }
         db_redis.lpush("query_charge_6104", json.dumps(charge_data))
 
