@@ -1,7 +1,9 @@
 import gevent
 import binascii
 import datetime
+import json
 from gevent import socket,monkey
+from backend.redis_db import *
 monkey.patch_all()
 
 
@@ -90,6 +92,26 @@ def handle_request(conn):
                 tmp_ret = binascii.unhexlify(new_ret)
                 print("6103-发送的报文:", tmp_ret)
                 conn.send(tmp_ret)
+
+            # 发送查询报文6104
+            data = db_redis.lpop("query_charge_6104")
+            if not data:
+                data = str(data, encoding="utf-8")
+                send_data = json.dumps(data)
+                pkglen = hex(102).replace("0x", "")
+                pkglen = "00" + pkglen
+                pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
+                query_no = "6104"
+                akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
+                spear_no = hex(data["spear_no"]).replace("0x", "")
+                spear_no = "0000" + spear_no
+                spear_no = "".join(list(reversed([spear_no[i:i + 2] for i in range(0, len(spear_no), 2)])))
+                stake_no = "0000000" + data["stake_no"]
+                stake_no = "".join(list(reversed([stake_no[i:i + 2] for i in range(0, len(stake_no), 2)])))
+                uuid = stake_no + spear_no
+                uuid = binascii.unhexlify(uuid)
+
+
     # 如果出现异常就打印异常
     except Exception as ex:
         print(ex)
@@ -99,5 +121,31 @@ def handle_request(conn):
 
 
 if __name__ == '__main__':
+    data = db_redis.lpop("query_charge_6104")
+    if data:
+        data = str(data, encoding="utf-8")
+        send_data = json.loads(data)
+        pkglen = hex(102).replace("0x", "")
+        pkglen = "00" + pkglen
+        pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
+
+        query_no = "6104"
+        akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
+
+        spear_no = hex(int(send_data["spear_no"])).replace("0x", "")
+        spear_no = "0000" + spear_no
+        spear_no = "".join(list(reversed([spear_no[i:i + 2] for i in range(0, len(spear_no), 2)])))
+        stake_no = "0000000" + send_data["stake_no"]
+        stake_no = "".join(list(reversed([stake_no[i:i + 2] for i in range(0, len(stake_no), 2)])))
+        uuid = stake_no + spear_no
+
+        calcno = send_data["calcno"] + "\x00\x00\x00\x00"
+        calcno = binascii.hexlify(bytes(calcno, encoding="utf-8"))
+        uid = hex(int(send_data["uid"])).replace("0x", "")
+        uid = "0000000" + uid
+        uid = "".join(list(reversed([uid[i:i + 2] for i in range(0, len(uid), 2)])))
+
+
+
     server(8500)
 

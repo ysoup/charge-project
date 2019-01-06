@@ -39,7 +39,7 @@ class ChargeStation(BaseModel):
     update_time = DateTimeField(null=True)
     voltage = IntegerField(null=True)
     charge_address = CharField(null=True)
-    
+
     class Meta:
         table_name = 'charge_station'
 
@@ -77,7 +77,7 @@ class UseInfo(BaseModel):
     use_name = CharField()
     use_sex = IntegerField(null=True)
     use_type = IntegerField(null=True)
-    user_no = CharField(primary_key=True)
+    user_no = CharField(null=True)
 
     class Meta:
         table_name = 'use_info'

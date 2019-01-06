@@ -15,7 +15,8 @@ import json
 from backend.redis_db import *
 from decimal import *
 import logging
-
+import datetime
+import time
 
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 logging.basicConfig(filename='my.log', level=logging.DEBUG, format=LOG_FORMAT)
@@ -329,11 +330,62 @@ class ChargeStationHandler(BaseRequestHandler):
         result = json_result(0, dic)
         self.write(result)
 
-    @login_required
+    # @login_required
     def post(self, *args, **kwargs):
         data = get_cleaned_post_data(self, ["stake_no", "spear_no", "qr_code", "user_no"])
+        # 查询当前用户编号
+        user_info = UseInfo.select().where(UseInfo.user_no == data["user_no"]).first()
+        uid = user_info.id
+        t = time.time()
+        current_time = int(round(t * 1000))
+        current_date = datetime.datetime.now().strftime('%Y%m%d')
+        calcno = "calcno" + "_" + current_date + str(current_time)
         # 发送充电队列
-        db_redis.lpush()
+        charge_data = {
+            "stake_no": data["stake_no"],
+            "spear_no": data["spear_no"],
+            "uid": uid,
+            "calcno": calcno,
+            "user_no": data["user_no"]
+        }
+        db_redis.lpush("query_charge_6104", json.dumps(charge_data))
+
+        result = json_result(0, {"calcno": calcno, "uid": uid})
+        self.write(result)
+
+
+# 获取电桩是否可以充电状态
+class ChargeStatusHandler(BaseRequestHandler):
+    def post(self, *args, **kwargs):
+        data = get_cleaned_post_data(self, ["calcno", "user_no"])
+        catch_data = db_redis.get("charge_status_%s" % data["calcno"])
+        dic = {}
+        if catch_data:
+            catch_data = json.loads(catch_data)
+            if catch_data["gunstatus"] == "1":
+                # 可以充电
+                dic["status"] = 1
+                # 创建充电订单
+                # 发送充电命令
+
+            else:
+                # 不可以充电
+                dic["status"] = 2
+        else:
+            # 没有返回消息
+            dic["status"] = 0
+        result = json_result(0, dic)
+        self.write(result)
+
+# 获取充电详情
+
+# 充电结束
+
+#
+
+
+
+
 
 
 

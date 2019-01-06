@@ -8,6 +8,7 @@ import functools
 from urllib.parse import urlencode
 import urllib.parse as urlparse
 from backend.redis_db import *
+import string
 import logging
 
 
@@ -178,3 +179,15 @@ def trans_xml_to_dict(xml):
     # 将 XML 数据转化为 Dict
     data = dict([(item.name, item.text) for item in xml.find_all()])
     return data
+
+
+def generate_random_str(randomlength=16):
+    """
+    生成一个指定长度的随机字符串，其中
+    string.digits=0123456789
+    string.ascii_letters=abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+    """
+    str_list = [random.choice(string.digits + string.ascii_letters) for i in range(randomlength)]
+    random_str = ''.join(str_list)
+
+    return random_str
