@@ -38,7 +38,8 @@ class ChargeStation(BaseModel):
     stake_2_status = IntegerField(null=True)
     update_time = DateTimeField(null=True)
     voltage = IntegerField(null=True)
-
+    charge_address = CharField(null=True)
+    
     class Meta:
         table_name = 'charge_station'
 
