@@ -211,12 +211,9 @@ class WeChatPayHandler(BaseRequestHandler):
     @login_required
     def post(self, *args, **kwargs):
         data = get_cleaned_post_data(self, ['fee', "code", "user_no"])
-        logging.info("威信支付:ip %s" % self.request.headers)
-        logging.info("威信支付:ip %s" % self.request.remote_ip)
-        logging.info("威信支付:ip %s" % self.request.host)
-        logging.info("威信支付:ip %s" % self.request.headers)
+        logging.info("威信支付:ip %s" % self.request.headers["X-Real-Ip"])
 
-        client_ip, port = self.request.host.split(":")
+        client_ip = self.request.headers["X-Real-Ip"]
         # 获取小程序openid
 
         openid_url = "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code" % (
@@ -262,6 +259,7 @@ class WeChatPayHandler(BaseRequestHandler):
             # 封装返回给前端的数据
             data = {"package": 'prepay_id={0}'.format(prepay_id), "nonceStr": nonceStr, "paySign": paySign, "timeStamp": timeStamp}
             result = json_result(0, data)
+            logging.info("微信支付返回值:%s" % result)
             self.write(result)
         else:
             PayOrderDetails.create(
@@ -272,6 +270,7 @@ class WeChatPayHandler(BaseRequestHandler):
                 pay_status=0
             )
             result = json_result(-1, "请求支付失败")
+            logging.info("微信支付返回值:%s" % result)
             self.write(result)
 
 
