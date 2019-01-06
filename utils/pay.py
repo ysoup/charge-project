@@ -116,7 +116,7 @@ def get_paysign(prepay_id, timeStamp, nonceStr):
 # 获取全部参数信息，封装成xml,传递过来的openid和客户端ip，和价格需要我们自己获取传递进来
 def get_bodyData(openid, client_ip, price, order_id):
     body = '充电桩'  # 商品描述
-    notify_url = 'https:/.../'  # 填写支付成功的回调地址，微信确认支付成功会访问这个接口
+    notify_url = 'https://cdz.0762ld.com/notify'  # 填写支付成功的回调地址，微信确认支付成功会访问这个接口
     nonce_str = getNonceStr()  # 随机字符串
     out_trade_no = order_id  # 商户订单号
     total_fee = str(price)  # 订单价格，单位是 分

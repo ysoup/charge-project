@@ -144,7 +144,7 @@ class SmsHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         data = get_cleaned_query_data(self, ['mobile_no', "code"])
         info = MobileCheckCode.select().where(MobileCheckCode.mobile_no == data["mobile_no"],
-                                              MobileCheckCode["code"] == data["code"]).first()
+                                              MobileCheckCode.code == data["code"]).first()
         if info:
             result = json_result(0, "校验成功")
         else:

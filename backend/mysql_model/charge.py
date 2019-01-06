@@ -8,10 +8,10 @@ from utils.util import random_str
 
 
 class AccountInfo(BaseModel):
-    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
-    total_amount = DecimalField(constraints=[SQL("DEFAULT 0.0000")])
-    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
-    user_no = CharField(constraints=[SQL("DEFAULT ''")])
+    create_time = DateTimeField(null=True)
+    total_amount = DecimalField()
+    update_time = DateTimeField(null=True)
+    user_no = CharField()
 
     class Meta:
         table_name = 'account_info'
@@ -25,12 +25,18 @@ class ChargeStation(BaseModel):
     charge_name = CharField(null=True)
     charge_station_status = IntegerField(null=True)
     charge_type = IntegerField(null=True)
-    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+    create_time = DateTimeField(null=True)
     depot = IntegerField(null=True)
     ground_lock = IntegerField(null=True)
     operation_type = IntegerField(null=True)
     parking_fee = IntegerField(null=True)
-    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+    qr_code = CharField(null=True)
+    spear_no = CharField(null=True)
+    stake_1 = IntegerField(null=True)
+    stake_1_status = IntegerField(null=True)
+    stake_2 = IntegerField(null=True)
+    stake_2_status = IntegerField(null=True)
+    update_time = DateTimeField(null=True)
     voltage = IntegerField(null=True)
 
     class Meta:
@@ -38,38 +44,38 @@ class ChargeStation(BaseModel):
 
 
 class MobileCheckCode(BaseModel):
-    code = CharField(constraints=[SQL("DEFAULT ''")], null=True)
-    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
-    mobile_no = CharField(constraints=[SQL("DEFAULT ''")], null=True, unique=True)
-    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
+    code = CharField(null=True)
+    create_time = DateTimeField(null=True)
+    mobile_no = CharField(null=True, unique=True)
+    update_time = DateTimeField(null=True)
 
     class Meta:
         table_name = 'mobile_check_code'
 
 
 class PayOrderDetails(BaseModel):
-    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
-    order_no = CharField(constraints=[SQL("DEFAULT ''")])
-    pay_fee = CharField(constraints=[SQL("DEFAULT ''")], null=True)
-    pay_status = CharField(constraints=[SQL("DEFAULT '0'")], null=True)
-    pay_type = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
-    user_no = CharField(constraints=[SQL("DEFAULT ''")])
+    create_time = DateTimeField(null=True)
+    order_no = CharField()
+    pay_fee = CharField(null=True)
+    pay_status = CharField(null=True)
+    pay_type = IntegerField(null=True)
+    update_time = DateTimeField(null=True)
+    user_no = CharField()
 
     class Meta:
         table_name = 'pay_order_details'
 
 
 class UseInfo(BaseModel):
-    birth_day = CharField(constraints=[SQL("DEFAULT ''")], null=True)
-    create_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
-    mobile_no = CharField(constraints=[SQL("DEFAULT ''")])
-    nick_name = CharField(constraints=[SQL("DEFAULT ''")], null=True)
-    update_time = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")], null=True)
-    use_img = CharField(constraints=[SQL("DEFAULT ''")], null=True)
-    use_name = CharField(constraints=[SQL("DEFAULT ''")])
-    use_sex = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
-    use_type = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    birth_day = CharField(null=True)
+    create_time = DateTimeField(null=True)
+    mobile_no = CharField()
+    nick_name = CharField(null=True)
+    update_time = DateTimeField(null=True)
+    use_img = CharField(null=True)
+    use_name = CharField()
+    use_sex = IntegerField(null=True)
+    use_type = IntegerField(null=True)
     user_no = CharField(primary_key=True)
 
     class Meta:
