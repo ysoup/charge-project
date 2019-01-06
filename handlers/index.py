@@ -319,7 +319,7 @@ class PayNotifyHandler(BaseRequestHandler):
 
 # 获取电桩信息
 class ChargeStationHandler(BaseRequestHandler):
-    # @login_required
+    @login_required
     def get(self, *args, **kwargs):
         data = get_cleaned_query_data(self, ["qr_code", "user_no"])
         station_info = ChargeStation.select().where(ChargeStation.qr_code == data["qr_code"]).first()
@@ -331,7 +331,6 @@ class ChargeStationHandler(BaseRequestHandler):
 
     def post(self, *args, **kwargs):
         data = get_cleaned_post_data(self, ["stake_no", "spear_no", "qr_code", "user_no"])
-
         # 发送充电队列
         db_redis.lpush()
 
