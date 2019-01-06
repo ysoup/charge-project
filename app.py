@@ -18,7 +18,8 @@ handlers = [
     (r'/sms', SmsHandler),
     (r'/user_login', UserLoginHandler),
     (r'/login_out', LoginOutHandler),
-    (r'/notify', PayNotifyHandler)
+    (r'/notify', PayNotifyHandler),
+    (r'/charge', ChargeStationHandler)
 ]
 
 application = tornado.web.Application(
