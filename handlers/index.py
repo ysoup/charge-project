@@ -217,7 +217,7 @@ class WeChatPayHandler(BaseRequestHandler):
         # 获取小程序openid
 
         openid_url = "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code" % (
-            APP_ID, APP_KEY, "033IIAzP0ZK0E42bexxP0LYLzP0IIAzW")
+            config.APP_ID, config.APP_KEY, data["code"])
         req = requests.get(openid_url)
         rep = req.json()
         openid = rep["openid"]
