@@ -321,7 +321,7 @@ class PayNotifyHandler(BaseRequestHandler):
 class ChargeStationHandler(BaseRequestHandler):
     @login_required
     def get(self, *args, **kwargs):
-        data = get_cleaned_query_data(self, ["qr_code", "user_no"])
+        data = get_cleaned_query_data(self, ["qr_code"])
         station_info = ChargeStation.select().where(ChargeStation.qr_code == data["qr_code"]).first()
         dic = {}
         if station_info:
