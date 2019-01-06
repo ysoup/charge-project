@@ -8,6 +8,11 @@ import functools
 from urllib.parse import urlencode
 import urllib.parse as urlparse
 from backend.redis_db import *
+import logging
+
+
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+logging.basicConfig(filename='my.log', level=logging.DEBUG, format=LOG_FORMAT)
 
 
 class RequestArgumentError(Exception):
@@ -99,13 +104,17 @@ def login_required(method):
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         headers = self.request.headers
+        logging.info("请求headers:%s" % headers)
         if headers.__contains__("Authorization"):
             authorization = headers["Authorization"]
             data = self.request.arguments
+            logging.info("请求data:%s" % data)
             if data.__contains__("user_no"):
                 cache_auth = db_redis.get("user_token_info_%s" % (str(data["user_no"][0], encoding="utf-8")))
                 cache_auth = str(cache_auth, encoding="utf-8") if cache_auth else None
+                logging.info("缓存:%s" % cache_auth)
                 if cache_auth != authorization:
+                    logging.info("缓存Authorization和请求头Authorization不一致:%s" % authorization)
                     return self.write("You have no access!")
                 else:
                     return method(self, *args, **kwargs)
