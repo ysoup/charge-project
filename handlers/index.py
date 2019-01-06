@@ -196,6 +196,11 @@ class UserInfoHandler(BaseRequestHandler):
         use_info = UseInfo.select().where(UseInfo.user_no == data["user_no"]).first()
         if use_info:
             data = model_to_dict(use_info)
+            account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
+            if account_info:
+                data["total_amount"] = account_info.total_amount
+            else:
+                data["total_amount"] = "0"
         result = json_result(0, data)
         self.write(result)
 
@@ -304,7 +309,12 @@ class PayNotifyHandler(BaseRequestHandler):
             self.write(ret_xml)
 
 
-#
+# 获取电桩信息
+class ChargeStationHandler(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        data = get_cleaned_query_data(self, ["qr_code", "user_no"])
+
+
 
 
 
