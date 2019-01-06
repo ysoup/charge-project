@@ -99,15 +99,18 @@ def login_required(method):
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         headers = self.request.headers
-        authorization = headers["Authorization"]
-        data = self.request.arguments
-        if data.__contains__("user_no"):
-            cache_auth = db_redis.get("user_token_info_%s" % (str(data["user_no"][0], encoding="utf-8")))
-            cache_auth = str(cache_auth, encoding="utf-8") if cache_auth else None
-            if cache_auth != authorization:
-                return self.write("You have no access!")
+        if headers.__contains__("Authorization"):
+            authorization = headers["Authorization"]
+            data = self.request.arguments
+            if data.__contains__("user_no"):
+                cache_auth = db_redis.get("user_token_info_%s" % (str(data["user_no"][0], encoding="utf-8")))
+                cache_auth = str(cache_auth, encoding="utf-8") if cache_auth else None
+                if cache_auth != authorization:
+                    return self.write("You have no access!")
+                else:
+                    return method(self, *args, **kwargs)
             else:
-                return method(self, *args, **kwargs)
+                return self.write("You have no access!")
         else:
             return self.write("You have no access!")
         # if not self.current_user:

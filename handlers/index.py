@@ -194,14 +194,15 @@ class UserInfoHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
         data = get_cleaned_query_data(self, ['user_no'])
         use_info = UseInfo.select().where(UseInfo.user_no == data["user_no"]).first()
+        dic = {}
         if use_info:
-            data = model_to_dict(use_info)
+            dic = model_to_dict(use_info)
             account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
             if account_info:
-                data["total_amount"] = account_info.total_amount
+                dic["total_amount"] = account_info.total_amount
             else:
-                data["total_amount"] = "0"
-        result = json_result(0, data)
+                dic["total_amount"] = "0"
+        result = json_result(0, dic)
         self.write(result)
 
 
@@ -313,6 +314,12 @@ class PayNotifyHandler(BaseRequestHandler):
 class ChargeStationHandler(BaseRequestHandler):
     def get(self, *args, **kwargs):
         data = get_cleaned_query_data(self, ["qr_code", "user_no"])
+        station_info = ChargeStation.select().where(ChargeStation.qr_code == data["qr_code"]).first()
+        dic = {}
+        if station_info:
+            dic = model_to_dict(station_info)
+
+
 
 
 
