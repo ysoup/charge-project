@@ -142,7 +142,7 @@ class SmsHandler(BaseRequestHandler):
         self.write(result)
 
     def post(self, *args, **kwargs):
-        data = get_cleaned_query_data(self, ['mobile_no', "code"])
+        data = get_cleaned_post_data(self, ['mobile_no', "code"])
         info = MobileCheckCode.select().where(MobileCheckCode.mobile_no == data["mobile_no"],
                                               MobileCheckCode.code == data["code"]).first()
         if info:
@@ -155,7 +155,7 @@ class SmsHandler(BaseRequestHandler):
 # 用户登录
 class UserLoginHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
-        data = get_cleaned_query_data(self, ['mobile_no'])
+        data = get_cleaned_post_data(self, ['mobile_no'])
 
         use_info = UseInfo.select().where(UseInfo.mobile_no == data["mobile_no"], UseInfo.use_type == 0).first()
         if use_info:
@@ -182,7 +182,7 @@ class UserLoginHandler(BaseRequestHandler):
 class LoginOutHandler(BaseRequestHandler):
     @login_required
     def post(self, *args, **kwargs):
-        data = get_cleaned_query_data(self, ['user_no'])
+        data = get_cleaned_post_data(self, ['user_no'])
         db_redis.delete("user_token_info_%s" % data["user_no"])
         result = json_result(0, "退出成功")
         self.write(result)
@@ -318,6 +318,8 @@ class ChargeStationHandler(BaseRequestHandler):
         dic = {}
         if station_info:
             dic = model_to_dict(station_info)
+        result = json_result(0, dic)
+        self.write(result)
 
 
 
