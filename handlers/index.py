@@ -320,7 +320,7 @@ class PayNotifyHandler(BaseRequestHandler):
 
 # 获取电桩信息
 class ChargeStationHandler(BaseRequestHandler):
-    @login_required
+    # @login_required
     def get(self, *args, **kwargs):
         data = get_cleaned_query_data(self, ["qr_code"])
         station_info = ChargeStation.select().where(ChargeStation.qr_code == data["qr_code"]).first()
