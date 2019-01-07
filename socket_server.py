@@ -103,22 +103,60 @@ def handle_request(conn):
 
             # 发送查询报文6104
             data = db_redis.lpop("query_charge_6104")
-            if not data:
+            if data:
                 data = str(data, encoding="utf-8")
-                send_data = json.dumps(data)
+                send_data = json.loads(data)
                 pkglen = hex(102).replace("0x", "")
                 pkglen = "00" + pkglen
                 pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
+
                 query_no = "6104"
                 akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
-                spear_no = hex(data["spear_no"]).replace("0x", "")
+
+                spear_no = hex(int(send_data["spear_no"])).replace("0x", "")
                 spear_no = "0000" + spear_no
                 spear_no = "".join(list(reversed([spear_no[i:i + 2] for i in range(0, len(spear_no), 2)])))
-                stake_no = "0000000" + data["stake_no"]
+                stake_no = "0000000" + send_data["stake_no"]
                 stake_no = "".join(list(reversed([stake_no[i:i + 2] for i in range(0, len(stake_no), 2)])))
                 uuid = stake_no + spear_no
-                uuid = binascii.unhexlify(uuid)
 
+                calcno = send_data["calcno"] + "\x00\x00\x00\x00"
+                calcno = binascii.hexlify(bytes(calcno, encoding="utf-8"))
+                calcno = str(calcno, encoding="utf-8")
+
+                uid = hex(int(send_data["uid"])).replace("0x", "")
+                uid = new_append_num(uid, 8)
+                uid = "".join(list(reversed([uid[i:i + 2] for i in range(0, len(uid), 2)])))
+                elecTime1 = "40E22D11"
+                elecTime2 = "80E34111"
+                elecTime3 = "C0045411"
+                elecTime4 = "C0012412"
+                elecTime5 = "DE023812"
+                elecTime6 = "1E044C12"
+                elecTime7 = "40055C12"
+                elecTime8 = "00001C13"
+                elecTime9 = "C0056013"
+                elecTime10 = "00000000"
+                elecPrice1 = hex(int(send_data["price"])).replace("0x", "")
+                elecPrice1 = new_append_num(elecPrice1, 4)
+                elecPrice1 = "".join(list(reversed([elecPrice1[i:i + 2] for i in range(0, len(elecPrice1), 2)])))
+
+                elecPrice2 = hex(int(send_data["price"])).replace("0x", "")
+                elecPrice2 = new_append_num(elecPrice2, 4)
+                elecPrice2 = "".join(list(reversed([elecPrice2[i:i + 2] for i in range(0, len(elecPrice2), 2)])))
+
+                elecPrice3 = hex(int(send_data["price"])).replace("0x", "")
+                elecPrice3 = new_append_num(elecPrice3, 4)
+                elecPrice3 = "".join(list(reversed([elecPrice3[i:i + 2] for i in range(0, len(elecPrice3), 2)])))
+
+                amount = hex(int(send_data["amount"])).replace("0x", "")
+                amount = new_append_num(amount, 8)
+                amount = "".join(list(reversed([amount[i:i + 2] for i in range(0, len(amount), 2)])))
+                new_ret = "f89ab68e" + pkglen + akg_id + uuid + calcno + uid + elecTime1 + elecTime2 + elecTime3 + elecTime4 + \
+                          elecTime5 + elecTime6 + elecTime7 + elecTime8 + elecTime9 + elecTime10 + elecPrice1 + elecPrice2 + elecPrice3 + amount
+
+                tmp_ret_6104 = binascii.unhexlify(new_ret)
+                conn.send(tmp_ret_6104)
 
     # 如果出现异常就打印异常
     except Exception as ex:
@@ -129,51 +167,5 @@ def handle_request(conn):
 
 
 if __name__ == '__main__':
-    data = db_redis.lpop("query_charge_6104")
-    if data:
-        data = str(data, encoding="utf-8")
-        send_data = json.loads(data)
-        pkglen = hex(102).replace("0x", "")
-        pkglen = "00" + pkglen
-        pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
-
-        query_no = "6104"
-        akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
-
-        spear_no = hex(int(send_data["spear_no"])).replace("0x", "")
-        spear_no = "0000" + spear_no
-        spear_no = "".join(list(reversed([spear_no[i:i + 2] for i in range(0, len(spear_no), 2)])))
-        stake_no = "0000000" + send_data["stake_no"]
-        stake_no = "".join(list(reversed([stake_no[i:i + 2] for i in range(0, len(stake_no), 2)])))
-        uuid = stake_no + spear_no
-
-        calcno = send_data["calcno"] + "\x00\x00\x00\x00"
-        calcno = binascii.hexlify(bytes(calcno, encoding="utf-8"))
-
-        uid = hex(int(send_data["uid"])).replace("0x", "")
-        # uid = "0000000" + uid
-        uid = new_append_num(uid, 8)
-        uid = "".join(list(reversed([uid[i:i + 2] for i in range(0, len(uid), 2)])))
-
-        elecPrice1 = hex(int(send_data["price"])).replace("0x", "")
-        elecPrice1 = new_append_num(elecPrice1, 4)
-        elecPrice1 = "".join(list(reversed([elecPrice1[i:i + 2] for i in range(0, len(elecPrice1), 2)])))
-
-        elecPrice2 = hex(int(send_data["price"])).replace("0x", "")
-        elecPrice2 = new_append_num(elecPrice2, 4)
-        elecPrice2 = "".join(list(reversed([elecPrice2[i:i + 2] for i in range(0, len(elecPrice2), 2)])))
-
-        elecPrice3 = hex(int(send_data["price"])).replace("0x", "")
-        elecPrice3 = new_append_num(elecPrice3, 4)
-        elecPrice3 = "".join(list(reversed([elecPrice3[i:i + 2] for i in range(0, len(elecPrice3), 2)])))
-
-        amount = hex(int(send_data["amount"])).replace("0x", "")
-        amount = new_append_num(amount, 8)
-        amount = "".join(list(reversed([amount[i:i + 2] for i in range(0, len(amount), 2)])))
-
-
-
-
-
     server(8500)
 
