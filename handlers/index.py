@@ -330,7 +330,7 @@ class ChargeStationHandler(BaseRequestHandler):
         result = json_result(0, dic)
         self.write(result)
 
-    @login_required
+    # @login_required
     def post(self, *args, **kwargs):
         data = get_cleaned_post_data(self, ["stake_no", "spear_no", "qr_code", "user_no"])
         # 查询账余额

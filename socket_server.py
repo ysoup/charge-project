@@ -2,9 +2,14 @@ import gevent
 import binascii
 import datetime
 import json
-from gevent import socket,monkey
-from backend.redis_db import *
+import redis
+import time
+from gevent import socket, monkey
+# from backend.redis_db import *
+
 monkey.patch_all()
+
+db_redis = redis.StrictRedis(host='39.106.154.14', port=6379, db=0)
 
 
 def append_num(val):
@@ -40,7 +45,8 @@ def handle_request(conn):
         while True:
             data = conn.recv(1024)
             print("recv:", data)
-            conn.send(data)
+            time.sleep(2)
+            # conn.send(data)
             if not data:
                 # 如果没有数据就关闭Client端
                 conn.shutdown(socket.SHUT_WR)
@@ -93,14 +99,25 @@ def handle_request(conn):
                 conn.send(tmp_ret)
             elif akg_id == "6103":
                 pkglen = hex(16).replace("0x", "")
-                pkglen = "00" + pkglen
+                pkglen = pkglen.zfill(4)
                 pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
-                new_ret = "f89ab68e" + str(pkglen) + new_ret[12:16] + uuid
+
+                query_no = "6103"
+                akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
+
+                spear_no = hex(int(spear_no)).replace("0x", "")
+                spear_no = "0000" + spear_no
+                spear_no = "".join(list(reversed([spear_no[i:i + 2] for i in range(0, len(spear_no), 2)])))
+                stake_no = "0000000" + str(stake_no)
+                stake_no = "".join(list(reversed([stake_no[i:i + 2] for i in range(0, len(stake_no), 2)])))
+                uuid = stake_no + spear_no
+
+                new_ret = "f89ab68e" + str(pkglen) + akg_id + uuid
                 print("6103-new_ret", new_ret)
                 tmp_ret = binascii.unhexlify(new_ret)
                 print("6103-发送的报文:", tmp_ret)
-                conn.send(tmp_ret)
-
+                var_6103 = conn.send(tmp_ret)
+                print(var_6103)
             # 发送查询报文6104
             data = db_redis.lpop("query_charge_6104")
             if data:
@@ -153,14 +170,15 @@ def handle_request(conn):
                 amount = new_append_num(amount, 8)
                 amount = "".join(list(reversed([amount[i:i + 2] for i in range(0, len(amount), 2)])))
                 new_ret = "f89ab68e" + pkglen + akg_id + uuid + calcno + uid + elecTime1 + elecTime2 + elecTime3 + elecTime4 + \
-                          elecTime5 + elecTime6 + elecTime7 + elecTime8 + elecTime9 + elecTime10 + elecPrice1 + elecPrice2 + elecPrice3 + amount
-
+                          elecTime5 + elecTime6 + elecTime7 + elecTime8 + elecTime9 + elecTime10 + elecPrice1 + elecPrice2 + elecPrice3 + amount + "00000000"
+                print("6104数据:", new_ret)
                 tmp_ret_6104 = binascii.unhexlify(new_ret)
-                conn.send(tmp_ret_6104)
-
+                val_6104 = conn.send(tmp_ret_6104)
+                print("6104发送成功")
+                print(val_6104)
     # 如果出现异常就打印异常
     except Exception as ex:
-        print(ex)
+        print(str(ex))
     # 最后中断实例的conn
     finally:
         conn.close()
@@ -168,4 +186,6 @@ def handle_request(conn):
 
 if __name__ == '__main__':
     server(8500)
+
+
 
