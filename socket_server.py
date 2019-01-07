@@ -13,6 +13,14 @@ def append_num(val):
     return val
 
 
+def new_append_num(val, length):
+    diff_len = length - len(str(val))
+    new_val = ""
+    for i in range(0, diff_len):
+        new_val = new_val + "0"
+    return new_val + str(val)
+
+
 def server(port):
     s = socket.socket()
     s.bind(('0.0.0.0', port))
@@ -141,9 +149,29 @@ if __name__ == '__main__':
 
         calcno = send_data["calcno"] + "\x00\x00\x00\x00"
         calcno = binascii.hexlify(bytes(calcno, encoding="utf-8"))
+
         uid = hex(int(send_data["uid"])).replace("0x", "")
-        uid = "0000000" + uid
+        # uid = "0000000" + uid
+        uid = new_append_num(uid, 8)
         uid = "".join(list(reversed([uid[i:i + 2] for i in range(0, len(uid), 2)])))
+
+        elecPrice1 = hex(int(send_data["price"])).replace("0x", "")
+        elecPrice1 = new_append_num(elecPrice1, 4)
+        elecPrice1 = "".join(list(reversed([elecPrice1[i:i + 2] for i in range(0, len(elecPrice1), 2)])))
+
+        elecPrice2 = hex(int(send_data["price"])).replace("0x", "")
+        elecPrice2 = new_append_num(elecPrice2, 4)
+        elecPrice2 = "".join(list(reversed([elecPrice2[i:i + 2] for i in range(0, len(elecPrice2), 2)])))
+
+        elecPrice3 = hex(int(send_data["price"])).replace("0x", "")
+        elecPrice3 = new_append_num(elecPrice3, 4)
+        elecPrice3 = "".join(list(reversed([elecPrice3[i:i + 2] for i in range(0, len(elecPrice3), 2)])))
+
+        amount = hex(int(send_data["amount"])).replace("0x", "")
+        amount = new_append_num(amount, 8)
+        amount = "".join(list(reversed([amount[i:i + 2] for i in range(0, len(amount), 2)])))
+
+
 
 
 

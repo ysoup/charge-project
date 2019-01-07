@@ -320,7 +320,7 @@ class PayNotifyHandler(BaseRequestHandler):
 
 # 获取电桩信息
 class ChargeStationHandler(BaseRequestHandler):
-    # @login_required
+    @login_required
     def get(self, *args, **kwargs):
         data = get_cleaned_query_data(self, ["qr_code"])
         station_info = ChargeStation.select().where(ChargeStation.qr_code == data["qr_code"]).first()
@@ -330,7 +330,7 @@ class ChargeStationHandler(BaseRequestHandler):
         result = json_result(0, dic)
         self.write(result)
 
-    # @login_required
+    @login_required
     def post(self, *args, **kwargs):
         data = get_cleaned_post_data(self, ["stake_no", "spear_no", "qr_code", "user_no"])
         # 查询账余额
@@ -361,6 +361,7 @@ class ChargeStationHandler(BaseRequestHandler):
 
 # 获取电桩是否可以充电状态
 class ChargeStatusHandler(BaseRequestHandler):
+    @login_required
     def post(self, *args, **kwargs):
         data = get_cleaned_post_data(self, ["calcno", "user_no"])
         catch_data = db_redis.get("charge_status_%s" % data["calcno"])
@@ -372,7 +373,6 @@ class ChargeStatusHandler(BaseRequestHandler):
                 dic["status"] = 1
                 # 创建充电订单
                 # 发送充电命令
-
             else:
                 # 不可以充电
                 dic["status"] = 2
