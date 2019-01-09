@@ -45,7 +45,7 @@ def handle_request(conn):
         while True:
             data = conn.recv(1024)
             print("recv:", data)
-            time.sleep(2)
+            # time.sleep(2)
             # conn.send(data)
             if not data:
                 # 如果没有数据就关闭Client端
@@ -118,12 +118,21 @@ def handle_request(conn):
                 print("6103-发送的报文:", tmp_ret)
                 var_6103 = conn.send(tmp_ret)
                 print(var_6103)
+            elif akg_id == "6104":
+                # 解析报文
+                data_6104 =new_ret[32:]
+                calcno = data_6104[:-8]
+                calcno = binascii.unhexlify(calcno)
+                calcno = calcno[:-1].decode("utf-8")
+                gunstatus = data_6104[-8:]
+                gunstatus = int(gunstatus, 16)
+                db_redis.set("gun_status_%s" % calcno, gunstatus)
             # 发送查询报文6104
             data = db_redis.lpop("query_charge_6104")
             if data:
                 data = str(data, encoding="utf-8")
                 send_data = json.loads(data)
-                pkglen = hex(102).replace("0x", "")
+                pkglen = hex(106).replace("0x", "")
                 pkglen = "00" + pkglen
                 pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
 
@@ -176,6 +185,43 @@ def handle_request(conn):
                 val_6104 = conn.send(tmp_ret_6104)
                 print("6104发送成功")
                 print(val_6104)
+
+            # 发送6105数据
+            cache_data_6105 = db_redis.lpop("query_charge_6104")
+            if cache_data_6105:
+                data_6105 = str(cache_data_6105, encoding="utf-8")
+                send_data_6105 = json.loads(data_6105)
+
+                pkglen = hex(56).replace("0x", "")
+                pkglen = "00" + pkglen
+                pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
+
+                query_no = "6105"
+                akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
+
+                spear_no = hex(int(send_data_6105["spear_no"])).replace("0x", "")
+                spear_no = "0000" + spear_no
+                spear_no = "".join(list(reversed([spear_no[i:i + 2] for i in range(0, len(spear_no), 2)])))
+                stake_no = "0000000" + send_data_6105["stake_no"]
+                stake_no = "".join(list(reversed([stake_no[i:i + 2] for i in range(0, len(stake_no), 2)])))
+                uuid = stake_no + spear_no
+
+                order_no = send_data_6105["order_no"] + "\x00\x00\x00\x00"
+                order_no = binascii.hexlify(bytes(order_no, encoding="utf-8"))
+                order_no = str(order_no, encoding="utf-8")
+
+                uid = hex(int(send_data_6105["uid"])).replace("0x", "")
+                uid = new_append_num(uid, 8)
+                uid = "".join(list(reversed([uid[i:i + 2] for i in range(0, len(uid), 2)])))
+
+                is_can_begin = hex(int(send_data_6105["is_can_begin"])).replace("0x", "")
+                is_can_begin = new_append_num(is_can_begin, 8)
+                is_can_begin = "".join(list(reversed([is_can_begin[i:i + 2] for i in range(0, len(is_can_begin), 2)])))
+
+
+
+
+
     # 如果出现异常就打印异常
     except Exception as ex:
         print(str(ex))
@@ -186,6 +232,7 @@ def handle_request(conn):
 
 if __name__ == '__main__':
     server(8500)
+
 
 
 

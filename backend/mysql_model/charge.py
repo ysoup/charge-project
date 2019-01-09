@@ -4,7 +4,7 @@ import time, datetime
 from hashlib import md5
 from backend.mysql_model import BaseModel
 from peewee import *
-from utils.util import random_str
+#from utils.util import random_st
 
 
 class AccountInfo(BaseModel):
@@ -15,11 +15,26 @@ class AccountInfo(BaseModel):
 
     class Meta:
         table_name = 'account_info'
+        
 
+class ChargeOrderInfo(BaseModel):
+    amount = CharField(null=True)
+    create_time = DateTimeField(null=True)
+    order_no = CharField()
+    pay_status = IntegerField(null=True)
+    spear_no = CharField(null=True)
+    stake_no = CharField(null=True)
+    update_time = DateTimeField(null=True)
+    user_no = CharField()
+
+    class Meta:
+        table_name = 'charge_order_info'
+        
 
 class ChargeStation(BaseModel):
     auxiliary_source = IntegerField(null=True)
     business_hours = IntegerField(null=True)
+    charge_address = CharField(null=True)
     charge_api = IntegerField(null=True)
     charge_method = IntegerField(null=True)
     charge_name = CharField(null=True)
@@ -38,11 +53,10 @@ class ChargeStation(BaseModel):
     stake_2_status = IntegerField(null=True)
     update_time = DateTimeField(null=True)
     voltage = IntegerField(null=True)
-    charge_address = CharField(null=True)
 
     class Meta:
         table_name = 'charge_station'
-
+        
 
 class MobileCheckCode(BaseModel):
     code = CharField(null=True)
@@ -52,7 +66,7 @@ class MobileCheckCode(BaseModel):
 
     class Meta:
         table_name = 'mobile_check_code'
-
+        
 
 class PayOrderDetails(BaseModel):
     create_time = DateTimeField(null=True)
@@ -65,7 +79,7 @@ class PayOrderDetails(BaseModel):
 
     class Meta:
         table_name = 'pay_order_details'
-
+        
 
 class UseInfo(BaseModel):
     birth_day = CharField(null=True)
@@ -77,8 +91,21 @@ class UseInfo(BaseModel):
     use_name = CharField()
     use_sex = IntegerField(null=True)
     use_type = IntegerField(null=True)
-    user_no = CharField(null=True)
+    user_no = CharField(unique=True)
 
     class Meta:
         table_name = 'use_info'
+        
+
+class UserCalcnoInfo(BaseModel):
+    calc_no = CharField(null=True)
+    create_time = DateTimeField(null=True)
+    spear_no = CharField(null=True)
+    stake_no = CharField(null=True)
+    update_time = DateTimeField(null=True)
+    user_no = CharField(null=True)
+
+    class Meta:
+        table_name = 'user_calcno_info'
+        
 

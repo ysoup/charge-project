@@ -330,7 +330,7 @@ class ChargeStationHandler(BaseRequestHandler):
         result = json_result(0, dic)
         self.write(result)
 
-    @login_required
+    #login_required
     def post(self, *args, **kwargs):
         data = get_cleaned_post_data(self, ["stake_no", "spear_no", "qr_code", "user_no"])
         # 查询账余额
@@ -354,25 +354,52 @@ class ChargeStationHandler(BaseRequestHandler):
             "price": "150"
         }
         db_redis.lpush("query_charge_6104", json.dumps(charge_data))
-
+        UserCalcnoInfo.create(
+            calc_no=calcno,
+            user_no=data["user_no"],
+            spear_no=data["spear_no"],
+            stake_no=data["stake_no"]
+        )
         result = json_result(0, {"calcno": calcno, "uid": uid})
         self.write(result)
 
 
 # 获取电桩是否可以充电状态
 class ChargeStatusHandler(BaseRequestHandler):
-    @login_required
+    # @login_required
     def post(self, *args, **kwargs):
-        data = get_cleaned_post_data(self, ["calcno", "user_no"])
+        data = get_cleaned_post_data(self, ["calcno", "user_no", "uid"])
         catch_data = db_redis.get("charge_status_%s" % data["calcno"])
         dic = {}
         if catch_data:
-            catch_data = json.loads(catch_data)
-            if catch_data["gunstatus"] == "1":
+            # catch_data = json.loads(catch_data)
+            gun_status = catch_data.decode("utf-8")
+            if gun_status == "1":
                 # 可以充电
                 dic["status"] = 1
-                # 创建充电订单
-                # 发送充电命令
+                # 查询该用户充电
+                calcno_info = UserCalcnoInfo.select().where(UserCalcnoInfo.user_no == data["user_no"],
+                                                            UserCalcnoInfo.calc_no == data["calcno"]).first()
+                if calcno_info:
+                    # 创建充电订单
+                    t = time.time()
+                    current_time = int(round(t * 1000))
+                    current_date = datetime.datetime.now().strftime('%Y%m%d')
+                    order_no = current_date + str(current_time) + calcno_info.spear_no + calcno_info.stake_no + data["uid"]
+                    ChargeOrderInfo.create(
+                        order_no=order_no,
+                        user_no=data["user_no"],
+                        pay_status=0
+                    )
+                    # 发送充电命令
+                    charge_data = {
+                        "order_no": order_no,
+                        "spear_no": calcno_info.spear_no,
+                        "stake_no": calcno_info.stake_no,
+                        "uid": data["uid"],
+                        "is_can_begin": "1"
+                    }
+                    db_redis.lpush("query_charge_6105", json.dumps(charge_data))
             else:
                 # 不可以充电
                 dic["status"] = 2
