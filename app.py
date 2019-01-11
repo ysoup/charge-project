@@ -20,7 +20,10 @@ handlers = [
     (r'/login_out', LoginOutHandler),
     (r'/notify', PayNotifyHandler),
     (r'/charge', ChargeStationHandler),
-    (r'/charge_status', ChargeStatusHandler)
+    (r'/charge_status', ChargeStatusHandler),
+    (r'/charge_details', ChargeDetailsHandler),
+    (r'/charge_end', ChargeEndHandler),
+    (r'/charge_balance', ChargeBalanceHandler),
 ]
 
 application = tornado.web.Application(

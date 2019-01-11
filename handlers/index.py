@@ -17,6 +17,9 @@ from decimal import *
 import logging
 import datetime
 import time
+import decimal
+from backend.mysql_model import db_mysql
+import traceback
 
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 logging.basicConfig(filename='my.log', level=logging.DEBUG, format=LOG_FORMAT)
@@ -330,7 +333,7 @@ class ChargeStationHandler(BaseRequestHandler):
         result = json_result(0, dic)
         self.write(result)
 
-    #login_required
+    @login_required
     def post(self, *args, **kwargs):
         data = get_cleaned_post_data(self, ["stake_no", "spear_no", "qr_code", "user_no"])
         # 查询账余额
@@ -360,16 +363,16 @@ class ChargeStationHandler(BaseRequestHandler):
             spear_no=data["spear_no"],
             stake_no=data["stake_no"]
         )
-        result = json_result(0, {"calcno": calcno, "uid": uid})
+        result = json_result(0, {"calcno": calcno, "uid": uid, "user_no": data["user_no"]})
         self.write(result)
 
 
 # 获取电桩是否可以充电状态
 class ChargeStatusHandler(BaseRequestHandler):
-    # @login_required
+    @login_required
     def post(self, *args, **kwargs):
         data = get_cleaned_post_data(self, ["calcno", "user_no", "uid"])
-        catch_data = db_redis.get("charge_status_%s" % data["calcno"])
+        catch_data = db_redis.get("gun_status_%s" % data["calcno"])
         dic = {}
         if catch_data:
             # catch_data = json.loads(catch_data)
@@ -386,11 +389,13 @@ class ChargeStatusHandler(BaseRequestHandler):
                     current_time = int(round(t * 1000))
                     current_date = datetime.datetime.now().strftime('%Y%m%d')
                     order_no = current_date + str(current_time) + calcno_info.spear_no + calcno_info.stake_no + data["uid"]
-                    ChargeOrderInfo.create(
-                        order_no=order_no,
-                        user_no=data["user_no"],
-                        pay_status=0
-                    )
+                    dic["order_no"] = order_no
+                    with db_mysql.atomic() as transaction:
+                        ChargeOrderInfo.create(
+                            order_no=order_no,
+                            user_no=data["user_no"],
+                            pay_status=0
+                        )
                     # 发送充电命令
                     charge_data = {
                         "order_no": order_no,
@@ -409,11 +414,70 @@ class ChargeStatusHandler(BaseRequestHandler):
         result = json_result(0, dic)
         self.write(result)
 
+
 # 获取充电详情
+class ChargeDetailsHandler(BaseRequestHandler):
+    def post(self, *args, **kwargs):
+        try:
+            data = get_cleaned_post_data(self, ["user_no", "order_no"])
+
+        except Exception as e:
+            print(traceback.format_exc())
+
 
 # 充电结束
+class ChargeEndHandler(BaseRequestHandler):
+    @login_required
+    def post(self, *args, **kwargs):
+        try:
+            data = get_cleaned_post_data(self, ["user_no", "order_no"])
+            # 发送充电结束指令
+            order_info = ChargeOrderInfo.select().where(ChargeOrderInfo.order_no == data["order_no"]).first()
+            dic = {}
+            dic["status"] = 0
+            if order_info:
+                charge_data = {
+                    "order_no": data["order_no"],
+                    "spear_no": order_info.spear_no,
+                    "stake_no": order_info.stake_no,
+                }
+                db_redis.lpush("query_charge_6106", json.dumps(charge_data))
+                dic["status"] = 1
+            result = json_result(0, dic)
+            self.write(result)
+        except Exception as e:
+            print(traceback.format_exc())
 
-#
+
+# 充电结帐
+class ChargeBalanceHandler(BaseRequestHandler):
+    @login_required
+    def post(self, *args, **kwargs):
+        try:
+            data = get_cleaned_post_data(self, ["user_no", "order_no"])
+            order_info = ChargeOrderInfo.select().where(ChargeOrderInfo.order_no == data["order_no"]).first()
+            if order_info:
+                # 结帐
+                # 查询账户
+                account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
+                if account_info:
+                    amount = account_info.total_amount - decimal.Decimal(order_info.amount)
+                    # 更新账户及订单状态
+                    with db_mysql.atomic() as transaction:
+                        AccountInfo.update(total_amount=amount).where(AccountInfo.user_no == data["user_no"]).execute()
+                        ChargeOrderInfo.update(pay_status=1).where(ChargeOrderInfo.order_no == data["order_no"]).execute()
+                # 发送结帐信息
+                charge_data = {
+                    "order_no": data["order_no"],
+                    "spear_no": order_info.spear_no,
+                    "stake_no": order_info.stake_no,
+                    "is_ok": 1
+                }
+                db_redis.lpush("query_charge_6107", json.dumps(charge_data))
+                result = json_result(0, {"amount": order_info.amount, "status": 1})
+                self.write(result)
+        except Exception as e:
+            print(traceback.format_exc())
 
 
 

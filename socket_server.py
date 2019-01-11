@@ -127,6 +127,8 @@ def handle_request(conn):
                 gunstatus = data_6104[-8:]
                 gunstatus = int(gunstatus, 16)
                 db_redis.set("gun_status_%s" % calcno, gunstatus)
+            elif akg_id == "6106":
+                print("aaaa")
             # 发送查询报文6104
             data = db_redis.lpop("query_charge_6104")
             if data:
@@ -187,7 +189,7 @@ def handle_request(conn):
                 print(val_6104)
 
             # 发送6105数据
-            cache_data_6105 = db_redis.lpop("query_charge_6104")
+            cache_data_6105 = db_redis.lpop("query_charge_6105")
             if cache_data_6105:
                 data_6105 = str(cache_data_6105, encoding="utf-8")
                 send_data_6105 = json.loads(data_6105)
@@ -217,11 +219,58 @@ def handle_request(conn):
                 is_can_begin = hex(int(send_data_6105["is_can_begin"])).replace("0x", "")
                 is_can_begin = new_append_num(is_can_begin, 8)
                 is_can_begin = "".join(list(reversed([is_can_begin[i:i + 2] for i in range(0, len(is_can_begin), 2)])))
+                new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no + uid + is_can_begin
 
+                print("6105数据:", new_ret)
+                tmp_ret_6105 = binascii.unhexlify(new_ret)
+                val_6105 = conn.send(tmp_ret_6105)
 
+                print("6105发送成功")
+                print(val_6105)
 
+            cache_data_6106 = db_redis.lpop("query_charge_6106")
+            if cache_data_6106:
+                data_6106 = str(cache_data_6106, encoding="utf-8")
+                send_data_6106 = json.loads(data_6106)
 
+            cache_data_6107 = db_redis.lpop("query_charge_6107")
+            if cache_data_6107:
+                data_6107 = str(cache_data_6107, encoding="utf-8")
+                send_data_6107 = json.loads(data_6107)
 
+                pkglen = hex(56).replace("0x", "")
+                pkglen = "00" + pkglen
+                pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
+
+                query_no = "6105"
+                akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
+
+                spear_no = hex(int(send_data_6107["spear_no"])).replace("0x", "")
+                spear_no = "0000" + spear_no
+                spear_no = "".join(list(reversed([spear_no[i:i + 2] for i in range(0, len(spear_no), 2)])))
+                stake_no = "0000000" + send_data_6107["stake_no"]
+                stake_no = "".join(list(reversed([stake_no[i:i + 2] for i in range(0, len(stake_no), 2)])))
+                uuid = stake_no + spear_no
+
+                order_no = send_data_6107["order_no"] + "\x00\x00\x00\x00"
+                order_no = binascii.hexlify(bytes(order_no, encoding="utf-8"))
+                order_no = str(order_no, encoding="utf-8")
+
+                uid = hex(int(send_data_6107["uid"])).replace("0x", "")
+                uid = new_append_num(uid, 8)
+                uid = "".join(list(reversed([uid[i:i + 2] for i in range(0, len(uid), 2)])))
+
+                is_ok = hex(int(send_data_6107["is_ok"])).replace("0x", "")
+                is_ok = new_append_num(is_ok, 4)
+                is_ok = "".join(list(reversed([is_ok[i:i + 2] for i in range(0, len(is_ok), 2)])))
+                new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no + uid + is_ok
+
+                print("6107数据:", new_ret)
+                tmp_ret_6107 = binascii.unhexlify(new_ret)
+                val_6107 = conn.send(tmp_ret_6107)
+
+                print("6107发送成功")
+                print(val_6107)
     # 如果出现异常就打印异常
     except Exception as ex:
         print(str(ex))
