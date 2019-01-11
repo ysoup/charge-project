@@ -238,11 +238,11 @@ def handle_request(conn):
                 data_6107 = str(cache_data_6107, encoding="utf-8")
                 send_data_6107 = json.loads(data_6107)
 
-                pkglen = hex(56).replace("0x", "")
+                pkglen = hex(50).replace("0x", "")
                 pkglen = "00" + pkglen
                 pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
 
-                query_no = "6105"
+                query_no = "6107"
                 akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
 
                 spear_no = hex(int(send_data_6107["spear_no"])).replace("0x", "")
@@ -256,14 +256,14 @@ def handle_request(conn):
                 order_no = binascii.hexlify(bytes(order_no, encoding="utf-8"))
                 order_no = str(order_no, encoding="utf-8")
 
-                uid = hex(int(send_data_6107["uid"])).replace("0x", "")
-                uid = new_append_num(uid, 8)
-                uid = "".join(list(reversed([uid[i:i + 2] for i in range(0, len(uid), 2)])))
+                # uid = hex(int(send_data_6107["uid"])).replace("0x", "")
+                # uid = new_append_num(uid, 8)
+                # uid = "".join(list(reversed([uid[i:i + 2] for i in range(0, len(uid), 2)])))
 
                 is_ok = hex(int(send_data_6107["is_ok"])).replace("0x", "")
                 is_ok = new_append_num(is_ok, 4)
                 is_ok = "".join(list(reversed([is_ok[i:i + 2] for i in range(0, len(is_ok), 2)])))
-                new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no + uid + is_ok
+                new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no + is_ok
 
                 print("6107数据:", new_ret)
                 tmp_ret_6107 = binascii.unhexlify(new_ret)
