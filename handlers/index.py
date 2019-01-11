@@ -347,16 +347,17 @@ class ChargeStationHandler(BaseRequestHandler):
         current_date = datetime.datetime.now().strftime('%Y%m%d')
         calcno = "calcno" + "_" + current_date + str(current_time)
         # 发送充电队列
-        charge_data = {
-            "stake_no": data["stake_no"],
-            "spear_no": data["spear_no"],
-            "uid": uid,
-            "calcno": calcno,
-            "user_no": data["user_no"],
-            "amount": str(amount).split(".")[0],
-            "price": "150"
-        }
-        db_redis.lpush("query_charge_6104", json.dumps(charge_data))
+        for x in range(0, 2):
+            charge_data = {
+                "stake_no": data["stake_no"],
+                "spear_no": data["spear_no"],
+                "uid": uid,
+                "calcno": calcno,
+                "user_no": data["user_no"],
+                "amount": str(amount).split(".")[0],
+                "price": "150"
+            }
+            db_redis.lpush("query_charge_6104", json.dumps(charge_data))
         UserCalcnoInfo.create(
             calc_no=calcno,
             user_no=data["user_no"],
@@ -399,14 +400,16 @@ class ChargeStatusHandler(BaseRequestHandler):
                             stake_no=calcno_info.stake_no
                         )
                     # 发送充电命令
-                    charge_data = {
-                        "order_no": order_no,
-                        "spear_no": calcno_info.spear_no,
-                        "stake_no": calcno_info.stake_no,
-                        "uid": data["uid"],
-                        "is_can_begin": "1"
-                    }
-                    db_redis.lpush("query_charge_6105", json.dumps(charge_data))
+
+                    for x in range(0, 2):
+                        charge_data = {
+                            "order_no": order_no,
+                            "spear_no": calcno_info.spear_no,
+                            "stake_no": calcno_info.stake_no,
+                            "uid": data["uid"],
+                            "is_can_begin": "1"
+                        }
+                        db_redis.lpush("query_charge_6105", json.dumps(charge_data))
             else:
                 # 不可以充电
                 dic["status"] = 2
@@ -456,6 +459,14 @@ class ChargeBalanceHandler(BaseRequestHandler):
     @login_required
     def post(self, *args, **kwargs):
         try:
+            # charge_data = {
+            #     "spear_no": "10001",
+            #     "stake_no": "1",
+            #     "order_no": "2019011115471904423951000113",
+            #     "is_ok": "1"
+            #
+            # }
+            # db_redis.lpush("query_charge_6107", json.dumps(charge_data))
             data = get_cleaned_post_data(self, ["user_no", "order_no"])
             order_info = ChargeOrderInfo.select().where(ChargeOrderInfo.order_no == data["order_no"]).first()
             if order_info:
@@ -477,7 +488,7 @@ class ChargeBalanceHandler(BaseRequestHandler):
                 }
                 db_redis.lpush("query_charge_6107", json.dumps(charge_data))
                 result = json_result(0, {"amount": order_info.amount, "status": 1})
-                self.write(result)
+            self.write("aaa")
         except Exception as e:
             print(traceback.format_exc())
 
