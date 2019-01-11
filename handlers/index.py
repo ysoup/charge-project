@@ -401,7 +401,7 @@ class ChargeStatusHandler(BaseRequestHandler):
                         )
                     # 发送充电命令
 
-                    for x in range(0, 2):
+                    for x in range(0, 4):
                         charge_data = {
                             "order_no": order_no,
                             "spear_no": calcno_info.spear_no,
