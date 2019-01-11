@@ -394,7 +394,9 @@ class ChargeStatusHandler(BaseRequestHandler):
                         ChargeOrderInfo.create(
                             order_no=order_no,
                             user_no=data["user_no"],
-                            pay_status=0
+                            pay_status=0,
+                            spear_no=calcno_info.spear_no,
+                            stake_no=calcno_info.stake_no
                         )
                     # 发送充电命令
                     charge_data = {
