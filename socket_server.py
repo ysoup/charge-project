@@ -98,26 +98,78 @@ def handle_request(conn):
                 print("6101-发送的报文:", tmp_ret)
                 conn.send(tmp_ret)
             elif akg_id == "6103":
-                pkglen = hex(16).replace("0x", "")
-                pkglen = pkglen.zfill(4)
-                pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
+                if new_ret[32:] == "0".zfill(128):
+                    pkglen = hex(16).replace("0x", "")
+                    pkglen = pkglen.zfill(4)
+                    pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
 
-                query_no = "6103"
-                akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
+                    query_no = "6103"
+                    akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
 
-                spear_no = hex(int(spear_no)).replace("0x", "")
-                spear_no = "0000" + spear_no
-                spear_no = "".join(list(reversed([spear_no[i:i + 2] for i in range(0, len(spear_no), 2)])))
-                stake_no = "0000000" + str(stake_no)
-                stake_no = "".join(list(reversed([stake_no[i:i + 2] for i in range(0, len(stake_no), 2)])))
-                uuid = stake_no + spear_no
+                    spear_no = hex(int(spear_no)).replace("0x", "")
+                    spear_no = "0000" + spear_no
+                    spear_no = "".join(list(reversed([spear_no[i:i + 2] for i in range(0, len(spear_no), 2)])))
+                    stake_no = "0000000" + str(stake_no)
+                    stake_no = "".join(list(reversed([stake_no[i:i + 2] for i in range(0, len(stake_no), 2)])))
+                    uuid = stake_no + spear_no
 
-                new_ret = "f89ab68e" + str(pkglen) + akg_id + uuid
-                print("6103-new_ret", new_ret)
-                tmp_ret = binascii.unhexlify(new_ret)
-                print("6103-发送的报文:", tmp_ret)
-                var_6103 = conn.send(tmp_ret)
-                print(var_6103)
+                    new_ret = "f89ab68e" + str(pkglen) + akg_id + uuid
+                    print("6103-new_ret", new_ret)
+                    tmp_ret = binascii.unhexlify(new_ret)
+                    print("6103-发送的报文:", tmp_ret)
+                    var_6103 = conn.send(tmp_ret)
+                    print(var_6103)
+                else:
+                    # 充电详情
+                    dic = {}
+                    order_no = new_ret[32:96]
+                    order_no = binascii.unhexlify(order_no)
+                    order_no = order_no[:-4].decode("utf-8")
+                    dic["order_no"] = order_no
+
+                    purchase = new_ret[96:100]
+                    purchase = "".join(list(reversed([purchase[i:i + 2] for i in range(0, len(purchase), 2)])))
+                    purchase = int(purchase, 16)
+                    dic["purchase"] = purchase
+
+                    power = new_ret[100:104]
+                    power = "".join(list(reversed([power[i:i + 2] for i in range(0, len(power), 2)])))
+                    power = int(power, 16)
+                    dic["power"] = power
+
+                    chargeTime = new_ret[104:108]
+                    chargeTime = "".join(list(reversed([chargeTime[i:i + 2] for i in range(0, len(chargeTime), 2)])))
+                    chargeTime = int(chargeTime, 16)
+                    dic["chargeTime"] = chargeTime
+
+                    balance = new_ret[108:116]
+                    balance = "".join(list(reversed([balance[i:i + 2] for i in range(0, len(balance), 2)])))
+                    balance = int(balance, 16)
+                    dic["balance"] = balance
+
+                    soc = new_ret[116:120]
+                    soc = "".join(list(reversed([soc[i:i + 2] for i in range(0, len(soc), 2)])))
+                    soc = int(soc, 16)
+                    dic["soc"] = soc
+
+                    voltage = new_ret[120:128]
+                    voltage = "".join(list(reversed([voltage[i:i + 2] for i in range(0, len(voltage), 2)])))
+                    voltage = int(voltage, 16)
+                    dic["voltage"] = voltage
+
+                    cerrent = new_ret[128:136]
+                    cerrent = "".join(list(reversed([cerrent[i:i + 2] for i in range(0, len(cerrent), 2)])))
+                    cerrent = int(cerrent, 16)
+                    dic["cerrent"] = cerrent
+
+                    chargeState = new_ret[136:144]
+                    chargeState = "".join(list(reversed([chargeState[i:i + 2] for i in range(0, len(chargeState), 2)])))
+                    chargeState = int(chargeState, 16)
+                    dic["chargeState"] = chargeState
+
+                    print("6103充电详情", dic)
+                    db_redis.lpush("6103_charge_details_%s" % dic["order_no"], json.dumps(dic))
+
             elif akg_id == "6104":
                 # 解析报文
                 data_6104 =new_ret[32:]
@@ -233,6 +285,33 @@ def handle_request(conn):
                 data_6106 = str(cache_data_6106, encoding="utf-8")
                 send_data_6106 = json.loads(data_6106)
 
+                pkglen = hex(48).replace("0x", "")
+                pkglen = "00" + pkglen
+                pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
+
+                query_no = "6106"
+                akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
+
+                spear_no = hex(int(send_data_6106["spear_no"])).replace("0x", "")
+                spear_no = "0000" + spear_no
+                spear_no = "".join(list(reversed([spear_no[i:i + 2] for i in range(0, len(spear_no), 2)])))
+                stake_no = "0000000" + send_data_6106["stake_no"]
+                stake_no = "".join(list(reversed([stake_no[i:i + 2] for i in range(0, len(stake_no), 2)])))
+                uuid = stake_no + spear_no
+
+                order_no = send_data_6106["order_no"] + "\x00\x00\x00\x00"
+                order_no = binascii.hexlify(bytes(order_no, encoding="utf-8"))
+                order_no = str(order_no, encoding="utf-8")
+
+                new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no
+
+                print("6106数据:", new_ret)
+                tmp_ret_6106 = binascii.unhexlify(new_ret)
+                val_6106 = conn.send(tmp_ret_6106)
+
+                print("6106发送成功")
+                print(val_6106)
+
             cache_data_6107 = db_redis.lpop("query_charge_6107")
             if cache_data_6107:
                 data_6107 = str(cache_data_6107, encoding="utf-8")
@@ -255,10 +334,6 @@ def handle_request(conn):
                 order_no = send_data_6107["order_no"] + "\x00\x00\x00\x00"
                 order_no = binascii.hexlify(bytes(order_no, encoding="utf-8"))
                 order_no = str(order_no, encoding="utf-8")
-
-                # uid = hex(int(send_data_6107["uid"])).replace("0x", "")
-                # uid = new_append_num(uid, 8)
-                # uid = "".join(list(reversed([uid[i:i + 2] for i in range(0, len(uid), 2)])))
 
                 is_ok = hex(int(send_data_6107["is_ok"])).replace("0x", "")
                 is_ok = new_append_num(is_ok, 4)

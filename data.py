@@ -1,110 +1,61 @@
 import binascii
 
-a = " F8 9A B6 8E 6A 00 04 61 01 00 00 00 11 27 00 00 63 61 6C 63 6E 6F 5F 32 30 31 39 30 31 30 37 31 30 31 35 32 35 31 35 32 37 36 38 39 00 00 00 00 05 00 00 00 40 E2 2D 11 80 E3 41 11 C0 04 54 11 C0 01 24 12 DE 02 38 12 1E 04 4C 12 40 05 5C 12 00 00 1C 13 C0 05 60 13 00 00 00 00 73 00 5A 00 5A 00 88 13 00 00 00 00 00 00"
-
-b = a.split(" ")
-c = "".join(b)
-print(c)
-print(binascii.unhexlify("f89ab68e6a000461020000001127000063616c636e6f5f323031393031303931353437303131393633303535000000000200000040E22D1180E34111C0045411C0012412DE0238121E044C1240055C1200001C13C005601300000000960096009600581b000000000000"))
-aaa = binascii.unhexlify("f89ab68e6a000461020000001127000063616c636e6f5f323031393031303931353437303131393633303535000000000200000040E22D1180E34111C0045411C0012412DE0238121E044C1240055C1200001C13C005601300000000960096009600581b000000000000")
-data = binascii.hexlify(aaa)
-print(data)
-
-tmp = "F89AB68E" \
-      "6600" \
-      "0461" \
-      "0100000019270000" \
-      "63616C636E6F5F32303138303931313537353439393130343436313700000000" \
-      "05000000" \
-      "40E22D11" \
-      "80E34111" \
-      "C0045411" \
-      "C0012412" \
-      "DE023812" \
-      "1E044C12" \
-      "40055C12" \
-      "00001C13" \
-      "C0056013" \
-      "00000000" \
-      "9E00" \
-      "9E00" \
-      "9E00" \
-      "7C130000"
-
-# 6104_tmp = "f89ab68e" \
-#            "3100" \
-#            "0461" \
-#            "01000000" \
-#            "11270000" \
-#            "63616c636e6f5f32303139303130393135343730303635323035363600" \
-#            "00000002"
+new_ret = "f89ab68e5000036101000000112700003230313930313134313534373436323134353639333130303031313100000000990066000100f70000003100dddf00000e1f00000200000074ef0000401f0000"
+order_no = new_ret[32:96]
+order_no = binascii.unhexlify(order_no)
+order_no = order_no[:-4].decode("utf-8")
+print(order_no)
 
 
+purchase = new_ret[96:100]
+purchase = "".join(list(reversed([purchase[i:i + 2] for i in range(0, len(purchase), 2)])))
+purchase = int(purchase, 16)
+print(purchase)
 
 
-tmp = 'f89ab68e38000561020000001127000032303139303131303135343730393033373535393031303030313232000000000200000001000000'
-tmp1 ="F89AB68E38000561010000001927000032303138303931313937353031303139313931313431303030390000000000000500000001000000"
+power = new_ret[100:104]
+power = "".join(list(reversed([power[i:i + 2] for i in range(0, len(power), 2)])))
+power = int(power, 16)
+print(power)
 
-data = "F8 9A B6 8E 30 00 06 61 01 00 00 00 19 27 00 00 32 30 31 38 30 39 31 31 39 37 35 30 31 30 31 39 31 39 31 31 34 31 30 30 30 39 00 00 00 00 00 00 "
-print("".join(data.split(" ")))
-print(len("F89AB68E3000066101000000192700003230313830393131393735303130313931393131343130303039000000000000"))
+chargeTime = new_ret[104:108]
+chargeTime = "".join(list(reversed([chargeTime[i:i + 2] for i in range(0, len(chargeTime), 2)])))
+chargeTime = int(chargeTime, 16)
+print(chargeTime)
 
+balance = new_ret[108:116]
+balance = "".join(list(reversed([balance[i:i + 2] for i in range(0, len(balance), 2)])))
+balance = int(balance, 16)
+print(balance)
 
-tmp = "f89ab68e" \
-      "4800" \
-      "0661" \
-      "0200000011270000" \
-      "3230313930313130313534373039333635323038303130303031323200000000" \
-      "0000" \
-      "0000" \
-      "323031393031313031323134353400be" \
-      "07000000"
-print(len(tmp))
+soc = new_ret[116:120]
+soc = "".join(list(reversed([soc[i:i + 2] for i in range(0, len(soc), 2)])))
+soc = int(soc, 16)
+print(soc)
+
+voltage = new_ret[120:128]
+voltage = "".join(list(reversed([voltage[i:i + 2] for i in range(0, len(voltage), 2)])))
+#voltage = int(voltage, 16)
+print(voltage)
+
+cerrent = new_ret[128:136]
+cerrent = "".join(list(reversed([cerrent[i:i + 2] for i in range(0, len(cerrent), 2)])))
+#cerrent = int(cerrent, 16)
+print(cerrent)
+
+chargeState = new_ret[136:144]
+chargeState = "".join(list(reversed([chargeState[i:i + 2] for i in range(0, len(chargeState), 2)])))
+chargeState = int(chargeState, 16)
+print(chargeState)
 
 
 
-tmp = "F89AB68E" \
-      "3000" \
-      "0661" \
-      "0100000019270000" \
-      "3230313830393131" \
-      "3937353031303139" \
-      "3139313134313030" \
-      "3039000000000000"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-aa = "f89ab68e" \
-     "4800" \
-     "0661" \
-     "0200000011270000" \
-     "323031393031313031353437303933363532303830313030303132320000000000000000323031393031313031323134353400be" \
-     "07000000"
+# print(len(tmp1))
+# order = binascii.unhexlify(tmp1[32:96])
+# print(order)
+# print(order[:-4])
+# tmp = "f89ab68e50000361020000001127000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+# print(len(tmp))
+#
+tmp2 = "f89ab68e480006610100000011270000323031393031313431353437343730373036303433313030303131340000000002000100323031393031313432303539313400be04000000"
+print(len(tmp2))

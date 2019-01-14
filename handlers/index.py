@@ -425,7 +425,11 @@ class ChargeDetailsHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         try:
             data = get_cleaned_post_data(self, ["user_no", "order_no"])
+            cache_data = db_redis.lpop("6103_charge_details_%s" % data["order_no"])
+            charge_details = json.loads(cache_data)
 
+            result = json_result(0, charge_details)
+            self.write(result)
         except Exception as e:
             print(traceback.format_exc())
 
@@ -453,16 +457,18 @@ class ChargeEndHandler(BaseRequestHandler):
         except Exception as e:
             print(traceback.format_exc())
 
+#
+
 
 # 充电结帐
 class ChargeBalanceHandler(BaseRequestHandler):
-    @login_required
+    # @login_required
     def post(self, *args, **kwargs):
         try:
             # charge_data = {
             #     "spear_no": "10001",
             #     "stake_no": "1",
-            #     "order_no": "2019011115471904423951000113",
+            #     "order_no": "2019011415474707060431000114",
             #     "is_ok": "1"
             #
             # }
@@ -488,7 +494,7 @@ class ChargeBalanceHandler(BaseRequestHandler):
                 }
                 db_redis.lpush("query_charge_6107", json.dumps(charge_data))
                 result = json_result(0, {"amount": order_info.amount, "status": 1})
-            self.write("aaa")
+            self.write(result)
         except Exception as e:
             print(traceback.format_exc())
 
