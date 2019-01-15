@@ -405,7 +405,6 @@ class ChargeStatusHandler(BaseRequestHandler):
                             stake_no=calcno_info.stake_no
                         )
                     # 发送充电命令
-
                     for x in range(0, 4):
                         charge_data = {
                             "order_no": order_no,
@@ -432,8 +431,10 @@ class ChargeDetailsHandler(BaseRequestHandler):
         try:
             data = get_cleaned_post_data(self, ["user_no", "order_no"])
             cache_data = db_redis.lpop("6103_charge_details_%s" % data["order_no"])
-            charge_details = json.loads(cache_data)
-
+            charge_details = {}
+            if cache_data:
+                details_data = str(cache_data, encoding="utf-8")
+                charge_details = json.loads(details_data)
             result = json_result(0, charge_details)
             self.write(result)
         except Exception as e:
@@ -463,46 +464,55 @@ class ChargeEndHandler(BaseRequestHandler):
         except Exception as e:
             print(traceback.format_exc())
 
-#
-
 
 # 充电结帐
 class ChargeBalanceHandler(BaseRequestHandler):
     # @login_required
     def post(self, *args, **kwargs):
         try:
-            charge_data = {
-                "spear_no": "10001",
-                "stake_no": "1",
-                "order_no": "2019011515475639960961000114",
-                "is_ok": "1"
+            # charge_data = {
+            #     "spear_no": "10001",
+            #     "stake_no": "1",
+            #     "order_no": "2019011615475708662411000116",
+            #     "is_ok": "1"
+            #
+            # }
+            # db_redis.lpush("query_charge_6107", json.dumps(charge_data))
+            data = get_cleaned_post_data(self, ["user_no", "order_no"])
 
-            }
-            db_redis.lpush("query_charge_6107", json.dumps(charge_data))
-            # data = get_cleaned_post_data(self, ["user_no", "order_no"])
-            # order_info = ChargeOrderInfo.select().where(ChargeOrderInfo.order_no == data["order_no"]).first()
-            # if order_info:
-            #     # 结帐
-            #     # 查询账户
-            #     account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
-            #     if account_info:
-            #         amount = account_info.total_amount - decimal.Decimal(order_info.amount)
-            #         # 更新账户及订单状态
-            #         with db_mysql.atomic() as transaction:
-            #             AccountInfo.update(total_amount=amount).where(AccountInfo.user_no == data["user_no"]).execute()
-            #             ChargeOrderInfo.update(pay_status=1).where(ChargeOrderInfo.order_no == data["order_no"]).execute()
-            #     # 发送结帐信息
-            #     charge_data = {
-            #         "order_no": data["order_no"],
-            #         "spear_no": order_info.spear_no,
-            #         "stake_no": order_info.stake_no,
-            #         "is_ok": 1
-            #     }
-            #     db_redis.lpush("query_charge_6107", json.dumps(charge_data))
-            #     result = json_result(0, {"amount": order_info.amount, "status": 1})
-            self.write("aaaa")
+            # 获取结算6106队列数据
+            cache_data = db_redis.lpop("6106_charge_balance_%s" % data["order_no"])
+            if cache_data:
+                blance_data = str(cache_data, encoding="utf-8")
+                blance_data = json.loads(blance_data)
+                order_info = ChargeOrderInfo.select().where(ChargeOrderInfo.order_no == data["order_no"]).first()
+                if order_info:
+                    # 结帐
+                    # 查询账户
+                    account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
+                    if account_info:
+                        amount = account_info.total_amount - decimal.Decimal(blance_data["purchase"])
+                        # 更新账户及订单状态
+                        with db_mysql.atomic() as transaction:
+                            AccountInfo.update(total_amount=amount).where(AccountInfo.user_no == data["user_no"]).execute()
+                            ChargeOrderInfo.update(pay_status=1, amount=blance_data["purchase"]).where(
+                                ChargeOrderInfo.order_no == data["order_no"]).execute()
+                    # 发送结帐信息
+                    charge_data = {
+                        "order_no": data["order_no"],
+                        "spear_no": order_info.spear_no,
+                        "stake_no": order_info.stake_no,
+                        "is_ok": 1
+                    }
+                    db_redis.lpush("query_charge_6107", json.dumps(charge_data))
+                result = json_result(0, {"amount": order_info.amount, "power": blance_data["power"], "status": 1})
+            else:
+                result = json_result(0, {"status": 2})
+            self.write(result)
         except Exception as e:
             print(traceback.format_exc())
+            result = json_result(0, {"status": 0})
+            self.write(result)
 
 
 

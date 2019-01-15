@@ -5,6 +5,7 @@ import json
 import redis
 import time
 import logging
+import traceback
 from gevent import socket, monkey
 
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
@@ -184,7 +185,32 @@ def handle_request(conn):
                 gunstatus = int(gunstatus, 16)
                 db_redis.set("gun_status_%s" % calcno, gunstatus)
             elif akg_id == "6106":
-                print("aaaa")
+                # 解析报文
+                dic = {}
+                order_no = new_ret[32:96]
+                order_no = binascii.unhexlify(order_no)
+                order_no = order_no[:-4].decode("utf-8")
+                dic["order_no"] = order_no
+
+                purchase = new_ret[96:100]
+                purchase = "".join(list(reversed([purchase[i:i + 2] for i in range(0, len(purchase), 2)])))
+                purchase = int(purchase, 16)
+                dic["purchase"] = purchase
+
+                power = new_ret[100:104]
+                power = "".join(list(reversed([power[i:i + 2] for i in range(0, len(power), 2)])))
+                power = int(power, 16)
+                dic["power"] = power
+
+                endTime = new_ret[104:136]
+                endTime = binascii.unhexlify(endTime)
+                endTime = endTime[:-2].decode("utf-8")
+                dic["endTime"] = endTime
+
+                stopreason = new_ret[136:144]
+                logging.info("6106充电结算:%s" % json.dumps(dic))
+                db_redis.lpush("6106_charge_balance_%s" % dic["order_no"], json.dumps(dic))
+
             # 发送查询报文6104
             data = db_redis.lpop("query_charge_6104")
             if data:
@@ -341,13 +367,13 @@ def handle_request(conn):
                 is_ok = "".join(list(reversed([is_ok[i:i + 2] for i in range(0, len(is_ok), 2)])))
                 new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no + is_ok
 
-                logging.info("6106发送成功" + new_ret)
+                logging.info("6107发送成功" + new_ret)
                 tmp_ret_6107 = binascii.unhexlify(new_ret)
                 val_6107 = conn.send(tmp_ret_6107)
                 logging.info("6107发送成功")
     # 如果出现异常就打印异常
     except Exception as ex:
-        print(str(ex))
+        logging.error(traceback.format_exc())
     # 最后中断实例的conn
     finally:
         conn.close()
