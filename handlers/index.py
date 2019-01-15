@@ -325,18 +325,18 @@ class PayNotifyHandler(BaseRequestHandler):
 class ChargeStationHandler(BaseRequestHandler):
     # @login_required
     def get(self, *args, **kwargs):
-        qr_code = {
-            "10001_1": "10001",
-            "10001_2": "10001"
-        }
-        data = get_cleaned_query_data(self, ["qr_code"])
-        qr_code = data["qr_code"].split("_")[0]
-        station_info = ChargeStation.select().where(ChargeStation.qr_code == qr_code).first()
-        dic = {}
-        if station_info:
-            dic = model_to_dict(station_info)
-        result = json_result(0, dic)
-        self.write(result)
+        try:
+            data = get_cleaned_query_data(self, ["qr_code"])
+            qr_code = data["qr_code"].split("_")[0]
+            station_info = ChargeStation.select().where(ChargeStation.qr_code == qr_code).first()
+            dic = {}
+            if station_info:
+                dic = model_to_dict(station_info)
+            result = json_result(0, dic)
+            self.write(result)
+        except Exception as e:
+            logging.error(traceback.format_exc())
+
 
     @login_required
     def post(self, *args, **kwargs):
@@ -467,7 +467,7 @@ class ChargeEndHandler(BaseRequestHandler):
 
 # 充电结帐
 class ChargeBalanceHandler(BaseRequestHandler):
-    # @login_required
+    @login_required
     def post(self, *args, **kwargs):
         try:
             # charge_data = {
@@ -495,7 +495,8 @@ class ChargeBalanceHandler(BaseRequestHandler):
                         # 更新账户及订单状态
                         with db_mysql.atomic() as transaction:
                             AccountInfo.update(total_amount=amount).where(AccountInfo.user_no == data["user_no"]).execute()
-                            ChargeOrderInfo.update(pay_status=1, amount=blance_data["purchase"]).where(
+                            ChargeOrderInfo.update(pay_status=1, amount=blance_data["purchase"],
+                                                   power=blance_data["power"]).where(
                                 ChargeOrderInfo.order_no == data["order_no"]).execute()
                     # 发送结帐信息
                     charge_data = {

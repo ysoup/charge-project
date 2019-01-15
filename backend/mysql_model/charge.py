@@ -26,6 +26,7 @@ class ChargeOrderInfo(BaseModel):
     stake_no = CharField(null=True)
     update_time = DateTimeField(null=True)
     user_no = CharField()
+    power = CharField(null=True)
 
     class Meta:
         table_name = 'charge_order_info'
