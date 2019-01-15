@@ -330,7 +330,7 @@ class ChargeStationHandler(BaseRequestHandler):
             "10001_2": "10001"
         }
         data = get_cleaned_query_data(self, ["qr_code"])
-        qr_code = data["qr_code"].split("_")
+        qr_code = data["qr_code"].split("_")[0]
         station_info = ChargeStation.select().where(ChargeStation.qr_code == qr_code).first()
         dic = {}
         if station_info:
