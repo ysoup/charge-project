@@ -100,7 +100,7 @@ def handle_request(conn):
                     pkglen) + "0161" + uuid + current_hour + current_minute + current_second + current_month + current_day + current_year
                 logging.info("6101-new_ret:" + new_ret)
                 tmp_ret = binascii.unhexlify(new_ret)
-                logging.info("6101-发送的报文:" + tmp_ret)
+                logging.info("6101-发送的报文:" + str(tmp_ret, encoding="utf-8"))
                 conn.send(tmp_ret)
             elif akg_id == "6103":
                 if new_ret[32:] == "0".zfill(128):
