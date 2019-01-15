@@ -325,8 +325,13 @@ class PayNotifyHandler(BaseRequestHandler):
 class ChargeStationHandler(BaseRequestHandler):
     # @login_required
     def get(self, *args, **kwargs):
+        qr_code = {
+            "10001_1": "10001",
+            "10001_2": "10001"
+        }
         data = get_cleaned_query_data(self, ["qr_code"])
-        station_info = ChargeStation.select().where(ChargeStation.qr_code == data["qr_code"]).first()
+        qr_code = data["qr_code"].split("_")[0]
+        station_info = ChargeStation.select().where(ChargeStation.qr_code == qr_code).first()
         dic = {}
         if station_info:
             dic = model_to_dict(station_info)
@@ -422,6 +427,7 @@ class ChargeStatusHandler(BaseRequestHandler):
 
 # 获取充电详情
 class ChargeDetailsHandler(BaseRequestHandler):
+    @login_required
     def post(self, *args, **kwargs):
         try:
             data = get_cleaned_post_data(self, ["user_no", "order_no"])
