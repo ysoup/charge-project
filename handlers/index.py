@@ -422,6 +422,7 @@ class ChargeStatusHandler(BaseRequestHandler):
 
 # 获取充电详情
 class ChargeDetailsHandler(BaseRequestHandler):
+    @login_required
     def post(self, *args, **kwargs):
         try:
             data = get_cleaned_post_data(self, ["user_no", "order_no"])
