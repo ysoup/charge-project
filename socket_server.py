@@ -56,7 +56,7 @@ def handle_request(conn):
                 # 如果没有数据就关闭Client端
                 conn.shutdown(socket.SHUT_WR)
             ret = binascii.hexlify(data)
-            logging.info("数据转码:" + ret)
+            logging.info("数据转码:" + str(ret, encoding="utf-8"))
             new_ret = str(ret, encoding="utf-8")
             stx = "".join(list(reversed([(new_ret[0:8])[i:i + 2] for i in range(0, len(new_ret[0:8]), 2)])))
             pkglen = ret[8:12]
