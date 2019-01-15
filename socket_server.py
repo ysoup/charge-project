@@ -4,7 +4,11 @@ import datetime
 import json
 import redis
 import time
+import logging
 from gevent import socket, monkey
+
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
+logging.basicConfig(filename='charge_socket.log', level=logging.DEBUG, format=LOG_FORMAT)
 # from backend.redis_db import *
 
 monkey.patch_all()
@@ -51,20 +55,20 @@ def handle_request(conn):
                 # 如果没有数据就关闭Client端
                 conn.shutdown(socket.SHUT_WR)
             ret = binascii.hexlify(data)
-            print("数据转码:", ret)
+            logging.info("数据转码:" + ret)
             new_ret = str(ret, encoding="utf-8")
             stx = "".join(list(reversed([(new_ret[0:8])[i:i + 2] for i in range(0, len(new_ret[0:8]), 2)])))
             pkglen = ret[8:12]
-            print("stx:", stx)
+            logging.info("stx:" + stx)
             akg_id = "".join(list(reversed([(new_ret[12:16])[i:i + 2] for i in range(0, len(new_ret[12:16]), 2)])))
-            print("akg_id", akg_id)
+            logging.info("akg_id:" + akg_id)
             uuid = new_ret[16:]
             stake_no = "".join(list(reversed([(uuid[:8])[i:i + 2] for i in range(0, len(uuid[:8]), 2)])))
             stake_no = int(stake_no, 16)
-            print("枪号stake_no:", stake_no)
+            logging.info("枪号stake_no:" + str(stake_no))
             spear_no = "".join(list(reversed([(uuid[8:])[i:i + 2] for i in range(0, len(uuid[8:]), 2)])))
             spear_no = int(spear_no, 16)
-            print("桩号spear_no:", spear_no)
+            logging.info("桩号spear_no:" + str(spear_no))
             # 登录信息
             if akg_id == "6101":
                 # 发送响应报文
@@ -93,9 +97,9 @@ def handle_request(conn):
 
                 new_ret = "f89ab68e" + str(
                     pkglen) + "0161" + uuid + current_hour + current_minute + current_second + current_month + current_day + current_year
-                print("6101-new_ret", new_ret)
+                logging.info("6101-new_ret:" + new_ret)
                 tmp_ret = binascii.unhexlify(new_ret)
-                print("6101-发送的报文:", tmp_ret)
+                logging.info("6101-发送的报文:" + tmp_ret)
                 conn.send(tmp_ret)
             elif akg_id == "6103":
                 if new_ret[32:] == "0".zfill(128):
@@ -115,10 +119,11 @@ def handle_request(conn):
 
                     new_ret = "f89ab68e" + str(pkglen) + akg_id + uuid
                     print("6103-new_ret", new_ret)
+                    logging.info("6103-new_ret:" + new_ret)
                     tmp_ret = binascii.unhexlify(new_ret)
-                    print("6103-发送的报文:", tmp_ret)
+                    logging.info("6103-发送的报文:" + tmp_ret)
                     var_6103 = conn.send(tmp_ret)
-                    print(var_6103)
+                    # print(var_6103)
                 else:
                     # 充电详情
                     dic = {}
@@ -166,8 +171,7 @@ def handle_request(conn):
                     chargeState = "".join(list(reversed([chargeState[i:i + 2] for i in range(0, len(chargeState), 2)])))
                     chargeState = int(chargeState, 16)
                     dic["chargeState"] = chargeState
-
-                    print("6103充电详情", dic)
+                    logging.info("6103充电详情:" + json.dumps(dic))
                     db_redis.lpush("6103_charge_details_%s" % dic["order_no"], json.dumps(dic))
 
             elif akg_id == "6104":
@@ -234,10 +238,10 @@ def handle_request(conn):
                 amount = "".join(list(reversed([amount[i:i + 2] for i in range(0, len(amount), 2)])))
                 new_ret = "f89ab68e" + pkglen + akg_id + uuid + calcno + uid + elecTime1 + elecTime2 + elecTime3 + elecTime4 + \
                           elecTime5 + elecTime6 + elecTime7 + elecTime8 + elecTime9 + elecTime10 + elecPrice1 + elecPrice2 + elecPrice3 + amount + "00000000"
-                print("6104数据:", new_ret)
+                logging.info("6104数据:" + new_ret)
                 tmp_ret_6104 = binascii.unhexlify(new_ret)
                 val_6104 = conn.send(tmp_ret_6104)
-                print("6104发送成功")
+                logging.info("6104发送成功")
                 print(val_6104)
 
             # 发送6105数据
@@ -273,12 +277,11 @@ def handle_request(conn):
                 is_can_begin = "".join(list(reversed([is_can_begin[i:i + 2] for i in range(0, len(is_can_begin), 2)])))
                 new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no + uid + is_can_begin
 
-                print("6105数据:", new_ret)
+                logging.info("6105数据:" + new_ret)
                 tmp_ret_6105 = binascii.unhexlify(new_ret)
                 val_6105 = conn.send(tmp_ret_6105)
 
-                print("6105发送成功")
-                print(val_6105)
+                logging.info("6105发送成功")
 
             cache_data_6106 = db_redis.lpop("query_charge_6106")
             if cache_data_6106:
@@ -304,13 +307,11 @@ def handle_request(conn):
                 order_no = str(order_no, encoding="utf-8")
 
                 new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no
+                logging.info("6106数据:" + new_ret)
 
-                print("6106数据:", new_ret)
                 tmp_ret_6106 = binascii.unhexlify(new_ret)
                 val_6106 = conn.send(tmp_ret_6106)
-
-                print("6106发送成功")
-                print(val_6106)
+                logging.info("6106发送成功")
 
             cache_data_6107 = db_redis.lpop("query_charge_6107")
             if cache_data_6107:
@@ -340,12 +341,10 @@ def handle_request(conn):
                 is_ok = "".join(list(reversed([is_ok[i:i + 2] for i in range(0, len(is_ok), 2)])))
                 new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no + is_ok
 
-                print("6107数据:", new_ret)
+                logging.info("6106发送成功" + new_ret)
                 tmp_ret_6107 = binascii.unhexlify(new_ret)
                 val_6107 = conn.send(tmp_ret_6107)
-
-                print("6107发送成功")
-                print(val_6107)
+                logging.info("6107发送成功")
     # 如果出现异常就打印异常
     except Exception as ex:
         print(str(ex))
