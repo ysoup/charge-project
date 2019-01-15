@@ -337,91 +337,97 @@ class ChargeStationHandler(BaseRequestHandler):
         except Exception as e:
             logging.error(traceback.format_exc())
 
-
     @login_required
     def post(self, *args, **kwargs):
-        data = get_cleaned_post_data(self, ["stake_no", "spear_no", "qr_code", "user_no"])
-        # 查询账余额
-        account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
-        amount = account_info.total_amount
-        # 查询当前用户编号
-        user_info = UseInfo.select().where(UseInfo.user_no == data["user_no"]).first()
-        uid = user_info.id
-        t = time.time()
-        current_time = int(round(t * 1000))
-        current_date = datetime.datetime.now().strftime('%Y%m%d')
-        calcno = "calcno" + "_" + current_date + str(current_time)
-        # 发送充电队列
-        for x in range(0, 2):
-            charge_data = {
-                "stake_no": data["stake_no"],
-                "spear_no": data["spear_no"],
-                "uid": uid,
-                "calcno": calcno,
-                "user_no": data["user_no"],
-                "amount": str(amount).split(".")[0],
-                "price": "150"
-            }
-            db_redis.lpush("query_charge_6104", json.dumps(charge_data))
-        UserCalcnoInfo.create(
-            calc_no=calcno,
-            user_no=data["user_no"],
-            spear_no=data["spear_no"],
-            stake_no=data["stake_no"]
-        )
-        result = json_result(0, {"calcno": calcno, "uid": uid, "user_no": data["user_no"]})
-        self.write(result)
+        try:
+            data = get_cleaned_post_data(self, ["stake_no", "spear_no", "qr_code", "user_no"])
+            # 查询账余额
+            account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
+            amount = account_info.total_amount
+            # 查询当前用户编号
+            user_info = UseInfo.select().where(UseInfo.user_no == data["user_no"]).first()
+            uid = user_info.id
+            t = time.time()
+            current_time = int(round(t * 1000))
+            current_date = datetime.datetime.now().strftime('%Y%m%d')
+            calcno = "calcno" + "_" + current_date + str(current_time)
+            # 发送充电队列
+            for x in range(0, 2):
+                charge_data = {
+                    "stake_no": data["stake_no"],
+                    "spear_no": data["spear_no"],
+                    "uid": uid,
+                    "calcno": calcno,
+                    "user_no": data["user_no"],
+                    "amount": str(amount).split(".")[0],
+                    "price": "150"
+                }
+                db_redis.lpush("query_charge_6104", json.dumps(charge_data))
+            UserCalcnoInfo.create(
+                calc_no=calcno,
+                user_no=data["user_no"],
+                spear_no=data["spear_no"],
+                stake_no=data["stake_no"]
+            )
+            result = json_result(0, {"calcno": calcno, "uid": uid, "user_no": data["user_no"]})
+            self.write(result)
+        except Exception as e:
+            logging.error(traceback.format_exc())
 
 
 # 获取电桩是否可以充电状态
 class ChargeStatusHandler(BaseRequestHandler):
     @login_required
     def post(self, *args, **kwargs):
-        data = get_cleaned_post_data(self, ["calcno", "user_no", "uid"])
-        catch_data = db_redis.get("gun_status_%s" % data["calcno"])
-        dic = {}
-        if catch_data:
-            # catch_data = json.loads(catch_data)
-            gun_status = catch_data.decode("utf-8")
-            if gun_status == "1":
-                # 可以充电
-                dic["status"] = 1
-                # 查询该用户充电
-                calcno_info = UserCalcnoInfo.select().where(UserCalcnoInfo.user_no == data["user_no"],
-                                                            UserCalcnoInfo.calc_no == data["calcno"]).first()
-                if calcno_info:
-                    # 创建充电订单
-                    t = time.time()
-                    current_time = int(round(t * 1000))
-                    current_date = datetime.datetime.now().strftime('%Y%m%d')
-                    order_no = current_date + str(current_time) + calcno_info.spear_no + calcno_info.stake_no + data["uid"]
-                    dic["order_no"] = order_no
-                    with db_mysql.atomic() as transaction:
-                        ChargeOrderInfo.create(
-                            order_no=order_no,
-                            user_no=data["user_no"],
-                            pay_status=0,
-                            spear_no=calcno_info.spear_no,
-                            stake_no=calcno_info.stake_no
-                        )
-                    # 发送充电命令
-                    for x in range(0, 4):
-                        charge_data = {
-                            "order_no": order_no,
-                            "spear_no": calcno_info.spear_no,
-                            "stake_no": calcno_info.stake_no,
-                            "uid": data["uid"],
-                            "is_can_begin": "1"
-                        }
-                        db_redis.lpush("query_charge_6105", json.dumps(charge_data))
+        try:
+            data = get_cleaned_post_data(self, ["calcno", "user_no", "uid"])
+            catch_data = db_redis.get("gun_status_%s" % data["calcno"])
+            dic = {}
+            if catch_data:
+                # catch_data = json.loads(catch_data)
+                gun_status = catch_data.decode("utf-8")
+                if gun_status == "1":
+                    # 可以充电
+                    dic["status"] = 1
+                    # 查询该用户充电
+                    calcno_info = UserCalcnoInfo.select().where(UserCalcnoInfo.user_no == data["user_no"],
+                                                                UserCalcnoInfo.calc_no == data["calcno"]).first()
+                    if calcno_info:
+                        # 创建充电订单
+                        t = time.time()
+                        current_time = int(round(t * 1000))
+                        current_date = datetime.datetime.now().strftime('%Y%m%d')
+                        order_no = current_date + str(current_time) + calcno_info.spear_no + calcno_info.stake_no + \
+                                   data["uid"]
+                        dic["order_no"] = order_no
+                        with db_mysql.atomic() as transaction:
+                            ChargeOrderInfo.create(
+                                order_no=order_no,
+                                user_no=data["user_no"],
+                                pay_status=0,
+                                spear_no=calcno_info.spear_no,
+                                stake_no=calcno_info.stake_no
+                            )
+                        # 发送充电命令
+                        for x in range(0, 4):
+                            charge_data = {
+                                "order_no": order_no,
+                                "spear_no": calcno_info.spear_no,
+                                "stake_no": calcno_info.stake_no,
+                                "uid": data["uid"],
+                                "is_can_begin": "1"
+                            }
+                            db_redis.lpush("query_charge_6105", json.dumps(charge_data))
+                else:
+                    # 不可以充电
+                    dic["status"] = 2
             else:
-                # 不可以充电
-                dic["status"] = 2
-        else:
-            # 没有返回消息
-            dic["status"] = 0
-        result = json_result(0, dic)
-        self.write(result)
+                # 没有返回消息
+                dic["status"] = 0
+            result = json_result(0, dic)
+            self.write(result)
+        except Exception as e:
+            logging.error(traceback.format_exc())
 
 
 # 获取充电详情
@@ -438,7 +444,7 @@ class ChargeDetailsHandler(BaseRequestHandler):
             result = json_result(0, charge_details)
             self.write(result)
         except Exception as e:
-            print(traceback.format_exc())
+            logging.error(traceback.format_exc())
 
 
 # 充电结束
@@ -462,7 +468,7 @@ class ChargeEndHandler(BaseRequestHandler):
             result = json_result(0, dic)
             self.write(result)
         except Exception as e:
-            print(traceback.format_exc())
+            logging.error(traceback.format_exc())
 
 
 # 充电结帐
@@ -511,7 +517,7 @@ class ChargeBalanceHandler(BaseRequestHandler):
                 result = json_result(0, {"status": 2})
             self.write(result)
         except Exception as e:
-            print(traceback.format_exc())
+            logging.error(traceback.format_exc())
             result = json_result(0, {"status": 0})
             self.write(result)
 
