@@ -98,11 +98,12 @@ def handle_request(conn):
 
                 new_ret = "f89ab68e" + str(
                     pkglen) + "0161" + uuid + current_hour + current_minute + current_second + current_month + current_day + current_year
-                logging.info("6101-new_ret:" + new_ret)
+                logging.info("6101-new_ret发送的报文:" + new_ret)
                 tmp_ret = binascii.unhexlify(new_ret)
-                logging.info("6101-发送的报文:" + str(tmp_ret, encoding="utf-8"))
+                # logging.info("6101-发送的报文:" + str(tmp_ret, encoding="utf-8"))
                 conn.send(tmp_ret)
             elif akg_id == "6103":
+                logging.info("6103-解析报文:" + new_ret)
                 if new_ret[32:] == "0".zfill(128):
                     pkglen = hex(16).replace("0x", "")
                     pkglen = pkglen.zfill(4)
@@ -120,9 +121,9 @@ def handle_request(conn):
 
                     new_ret = "f89ab68e" + str(pkglen) + akg_id + uuid
                     print("6103-new_ret", new_ret)
-                    logging.info("6103-new_ret:" + new_ret)
+                    logging.info("6103-new_ret发送的报文:" + new_ret)
                     tmp_ret = binascii.unhexlify(new_ret)
-                    logging.info("6103-发送的报文:" + tmp_ret)
+                    # logging.info("6103-发送的报文:" + tmp_ret)
                     var_6103 = conn.send(tmp_ret)
                     # print(var_6103)
                 else:
@@ -177,6 +178,7 @@ def handle_request(conn):
 
             elif akg_id == "6104":
                 # 解析报文
+                logging.info("6104-解析报文:" + new_ret)
                 data_6104 =new_ret[32:]
                 calcno = data_6104[:-8]
                 calcno = binascii.unhexlify(calcno)
@@ -187,6 +189,7 @@ def handle_request(conn):
             elif akg_id == "6106":
                 # 解析报文
                 dic = {}
+                logging.info("6106-解析报文:" + new_ret)
                 order_no = new_ret[32:96]
                 order_no = binascii.unhexlify(order_no)
                 order_no = order_no[:-4].decode("utf-8")
@@ -264,7 +267,7 @@ def handle_request(conn):
                 amount = "".join(list(reversed([amount[i:i + 2] for i in range(0, len(amount), 2)])))
                 new_ret = "f89ab68e" + pkglen + akg_id + uuid + calcno + uid + elecTime1 + elecTime2 + elecTime3 + elecTime4 + \
                           elecTime5 + elecTime6 + elecTime7 + elecTime8 + elecTime9 + elecTime10 + elecPrice1 + elecPrice2 + elecPrice3 + amount + "00000000"
-                logging.info("6104数据:" + new_ret)
+                logging.info("6104发送的报文:" + new_ret)
                 tmp_ret_6104 = binascii.unhexlify(new_ret)
                 val_6104 = conn.send(tmp_ret_6104)
                 logging.info("6104发送成功")
@@ -303,7 +306,7 @@ def handle_request(conn):
                 is_can_begin = "".join(list(reversed([is_can_begin[i:i + 2] for i in range(0, len(is_can_begin), 2)])))
                 new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no + uid + is_can_begin
 
-                logging.info("6105数据:" + new_ret)
+                logging.info("6105发送的报文::" + new_ret)
                 tmp_ret_6105 = binascii.unhexlify(new_ret)
                 val_6105 = conn.send(tmp_ret_6105)
 
@@ -333,7 +336,7 @@ def handle_request(conn):
                 order_no = str(order_no, encoding="utf-8")
 
                 new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no
-                logging.info("6106数据:" + new_ret)
+                logging.info("6106发送的报文::" + new_ret)
 
                 tmp_ret_6106 = binascii.unhexlify(new_ret)
                 val_6106 = conn.send(tmp_ret_6106)
@@ -367,7 +370,7 @@ def handle_request(conn):
                 is_ok = "".join(list(reversed([is_ok[i:i + 2] for i in range(0, len(is_ok), 2)])))
                 new_ret = "f89ab68e" + pkglen + akg_id + uuid + order_no + is_ok
 
-                logging.info("6107发送成功" + new_ret)
+                logging.info("6107发送的报文:" + new_ret)
                 tmp_ret_6107 = binascii.unhexlify(new_ret)
                 val_6107 = conn.send(tmp_ret_6107)
                 logging.info("6107发送成功")
