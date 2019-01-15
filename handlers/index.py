@@ -465,36 +465,36 @@ class ChargeBalanceHandler(BaseRequestHandler):
     # @login_required
     def post(self, *args, **kwargs):
         try:
-            # charge_data = {
-            #     "spear_no": "10001",
-            #     "stake_no": "1",
-            #     "order_no": "2019011415474707060431000114",
-            #     "is_ok": "1"
-            #
-            # }
-            # db_redis.lpush("query_charge_6107", json.dumps(charge_data))
-            data = get_cleaned_post_data(self, ["user_no", "order_no"])
-            order_info = ChargeOrderInfo.select().where(ChargeOrderInfo.order_no == data["order_no"]).first()
-            if order_info:
-                # 结帐
-                # 查询账户
-                account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
-                if account_info:
-                    amount = account_info.total_amount - decimal.Decimal(order_info.amount)
-                    # 更新账户及订单状态
-                    with db_mysql.atomic() as transaction:
-                        AccountInfo.update(total_amount=amount).where(AccountInfo.user_no == data["user_no"]).execute()
-                        ChargeOrderInfo.update(pay_status=1).where(ChargeOrderInfo.order_no == data["order_no"]).execute()
-                # 发送结帐信息
-                charge_data = {
-                    "order_no": data["order_no"],
-                    "spear_no": order_info.spear_no,
-                    "stake_no": order_info.stake_no,
-                    "is_ok": 1
-                }
-                db_redis.lpush("query_charge_6107", json.dumps(charge_data))
-                result = json_result(0, {"amount": order_info.amount, "status": 1})
-            self.write(result)
+            charge_data = {
+                "spear_no": "10001",
+                "stake_no": "1",
+                "order_no": "2019011515475639960961000114",
+                "is_ok": "1"
+
+            }
+            db_redis.lpush("query_charge_6107", json.dumps(charge_data))
+            # data = get_cleaned_post_data(self, ["user_no", "order_no"])
+            # order_info = ChargeOrderInfo.select().where(ChargeOrderInfo.order_no == data["order_no"]).first()
+            # if order_info:
+            #     # 结帐
+            #     # 查询账户
+            #     account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
+            #     if account_info:
+            #         amount = account_info.total_amount - decimal.Decimal(order_info.amount)
+            #         # 更新账户及订单状态
+            #         with db_mysql.atomic() as transaction:
+            #             AccountInfo.update(total_amount=amount).where(AccountInfo.user_no == data["user_no"]).execute()
+            #             ChargeOrderInfo.update(pay_status=1).where(ChargeOrderInfo.order_no == data["order_no"]).execute()
+            #     # 发送结帐信息
+            #     charge_data = {
+            #         "order_no": data["order_no"],
+            #         "spear_no": order_info.spear_no,
+            #         "stake_no": order_info.stake_no,
+            #         "is_ok": 1
+            #     }
+            #     db_redis.lpush("query_charge_6107", json.dumps(charge_data))
+            #     result = json_result(0, {"amount": order_info.amount, "status": 1})
+            self.write("aaaa")
         except Exception as e:
             print(traceback.format_exc())
 
