@@ -436,12 +436,14 @@ class ChargeDetailsHandler(BaseRequestHandler):
     def post(self, *args, **kwargs):
         try:
             data = get_cleaned_post_data(self, ["user_no", "order_no"])
+            logging.info("充电详情参数user_no:%s;order_no:%s" % (data["user_no"], data["order_no"]))
             cache_data = db_redis.lpop("6103_charge_details_%s" % data["order_no"])
             charge_details = {}
             if cache_data:
                 details_data = str(cache_data, encoding="utf-8")
                 charge_details = json.loads(details_data)
             result = json_result(0, charge_details)
+            logging.info("充电详情返回数据:" + result)
             self.write(result)
         except Exception as e:
             logging.error(traceback.format_exc())
@@ -479,7 +481,7 @@ class ChargeBalanceHandler(BaseRequestHandler):
             # charge_data = {
             #     "spear_no": "10001",
             #     "stake_no": "1",
-            #     "order_no": "2019011615475708662411000116",
+            #     "order_no": "2019011615476054662931000118",
             #     "is_ok": "1"
             #
             # }
@@ -521,6 +523,21 @@ class ChargeBalanceHandler(BaseRequestHandler):
             result = json_result(0, {"status": 0})
             self.write(result)
 
+
+# 提醒充值
+class MindRechargeHandler(BaseRequestHandler):
+    @login_required
+    def post(self, *args, **kwargs):
+        try:
+            data = get_cleaned_post_data(self, ["user_no"])
+            account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
+            amount = 0
+            if account_info:
+                amount = account_info.total_amount
+            result = json_result(0, {"amount": str(amount)})
+            self.write(result)
+        except Exception as e:
+            logging.error(traceback.format_exc())
 
 
 
