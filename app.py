@@ -24,6 +24,8 @@ handlers = [
     (r'/charge_details', ChargeDetailsHandler),
     (r'/charge_end', ChargeEndHandler),
     (r'/charge_balance', ChargeBalanceHandler),
+    (r'/charge_map_list', ChargeMapList),
+
 ]
 
 application = tornado.web.Application(

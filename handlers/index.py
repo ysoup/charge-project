@@ -20,6 +20,7 @@ import time
 import decimal
 from backend.mysql_model import db_mysql
 import traceback
+from playhouse.shortcuts import dict_to_model, model_to_dict
 
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 logging.basicConfig(filename='my.log', level=logging.DEBUG, format=LOG_FORMAT)
@@ -439,9 +440,34 @@ class ChargeDetailsHandler(BaseRequestHandler):
             logging.info("充电详情参数user_no:%s;order_no:%s" % (data["user_no"], data["order_no"]))
             cache_data = db_redis.lpop("6103_charge_details_%s" % data["order_no"])
             charge_details = {}
+            # 获取电桩信息
+            spear_no = data["order_no"][21:26]
+            charge_info = ChargeStation.select().where(ChargeStation.spear_no == spear_no).first()
+            charge_address = ""
+            if charge_info:
+                charge_address = charge_info.charge_address
             if cache_data:
                 details_data = str(cache_data, encoding="utf-8")
                 charge_details = json.loads(details_data)
+                charge_details["charge_address"] = charge_address
+                charge_details["charge_no"] = spear_no
+                ChargeDetails.create(
+                    charge_no=spear_no,
+                    charge_address=charge_address,
+                    balance=charge_details["balance"],
+                    cerrent=charge_details["cerrent"],
+                    chargestate=charge_details["chargeState"],
+                    chargetime=charge_details["chargeTime"],
+                    order_no=charge_details["order_no"],
+                    power=charge_details["power"],
+                    purchase=charge_details["purchase"],
+                    soc=charge_details["soc"],
+                    voltage=charge_details["voltage"]
+                )
+            else:
+                info = ChargeDetails.select().where(ChargeDetails.order_no == data["order_no"]).first()
+                if info:
+                    charge_details = model_to_dict(info)
             result = json_result(0, charge_details)
             logging.info("充电详情返回数据:" + result)
             self.write(result)
@@ -538,6 +564,43 @@ class MindRechargeHandler(BaseRequestHandler):
             self.write(result)
         except Exception as e:
             logging.error(traceback.format_exc())
+
+
+# 电桩地图
+class ChargeMapList(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        try:
+            info = ChargeStation.select()
+            charge_map_ls = []
+            for x in info:
+                dic = {}
+                dic["id"] = x.id
+                dic["charge_address"] = x.charge_address
+                dic["latitude"] = x.latitude
+                dic["longitude"] = x.longitude
+                dic["charge_fee"] = x.charge_fee
+                charge_map_ls.append(dic)
+
+            result = json_result(0, {"data": charge_map_ls})
+            self.write(result)
+        except Exception as e:
+            logging.error(traceback.format_exc())
+
+
+# 充电桩详情
+class ChargeStationDetails(BaseRequestHandler):
+    def get(self, *args, **kwargs):
+        try:
+            data = get_cleaned_post_data(self, ["id"])
+            info = ChargeStation.select().where(ChargeStation.id == data["id"]).first()
+            charge_details = {}
+            if info:
+                charge_details = model_to_dict(info)
+            result = json_result(0, {"data": charge_details})
+            self.write(result)
+        except Exception as e:
+            logging.error(traceback.format_exc())
+
 
 
 
