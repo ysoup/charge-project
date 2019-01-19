@@ -583,9 +583,23 @@ class PayOrderList(BaseRequestHandler):
     @login_required
     def get(self, *args, **kwargs):
         try:
-            data = get_cleaned_query_data(self, ["user_no"])
-            info = PayOrderDetails.select().where(PayOrderDetails.user_no == data["user_no"]).\
-                order_by(PayOrderDetails.create_time.desc()).limit(10)
+            data = get_cleaned_query_data(self, ["user_no", "type"])
+            if str(data["type"]) == "0":
+                info = PayOrderDetails.select().where(PayOrderDetails.user_no == data["user_no"],
+                                                      PayOrderDetails.pay_status == 0). \
+                    order_by(PayOrderDetails.create_time.desc()).limit(10)
+            elif str(data["type"]) == "1":
+                info = PayOrderDetails.select().where(PayOrderDetails.user_no == data["user_no"],
+                                                      PayOrderDetails.pay_status == 1). \
+                    order_by(PayOrderDetails.create_time.desc()).limit(10)
+            elif str(data["type"]) == "2":
+                info = PayOrderDetails.select().where(PayOrderDetails.user_no == data["user_no"],
+                                                      PayOrderDetails.pay_status == 2). \
+                    order_by(PayOrderDetails.create_time.desc()).limit(10)
+            else:
+                info = PayOrderDetails.select().where(PayOrderDetails.user_no == data["user_no"]). \
+                    order_by(PayOrderDetails.create_time.desc()).limit(10)
+            
             pay_ls = []
             for x in info:
                 dic = {}
