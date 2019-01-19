@@ -28,6 +28,8 @@ handlers = [
     # (r'/charge_station_details', ChargeStationDetailsHandler),
     (r'/charge_mind', MindRechargeHandler),
     (r'/charge_station_details', ChargeDetails),
+    (r'/pay_order_list', PayOrderList),
+    (r'/charge_order_list', ChargeOrderList),
 ]
 
 application = tornado.web.Application(
