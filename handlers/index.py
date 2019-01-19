@@ -1,16 +1,13 @@
 # coding:utf-8
 
 import requests
-import uuid
 import hmac
 from backend.mysql_model.charge import *
-from playhouse.shortcuts import model_to_dict
 from handlers.basehandlers.basehandler import BaseRequestHandler
 from .auth import Auth
 from utils.util import *
 from utils.pay import *
 from utils.send_sms import *
-import config
 import json
 from backend.redis_db import *
 from decimal import *
@@ -20,7 +17,7 @@ import time
 import decimal
 from backend.mysql_model import db_mysql
 import traceback
-from playhouse.shortcuts import dict_to_model, model_to_dict
+from playhouse.shortcuts import model_to_dict
 
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 logging.basicConfig(filename='my.log', level=logging.DEBUG, format=LOG_FORMAT)
@@ -515,32 +512,11 @@ class ChargeBalanceHandler(BaseRequestHandler):
             data = get_cleaned_post_data(self, ["user_no", "order_no"])
 
             # 获取结算6106队列数据
-            cache_data = db_redis.lpop("6106_charge_balance_%s" % data["order_no"])
+            cache_data = db_redis.get("charge_balance_%s" % data["order_no"])
             if cache_data:
                 blance_data = str(cache_data, encoding="utf-8")
                 blance_data = json.loads(blance_data)
-                order_info = ChargeOrderInfo.select().where(ChargeOrderInfo.order_no == data["order_no"]).first()
-                if order_info:
-                    # 结帐
-                    # 查询账户
-                    account_info = AccountInfo.select().where(AccountInfo.user_no == data["user_no"]).first()
-                    if account_info:
-                        amount = account_info.total_amount - decimal.Decimal(blance_data["purchase"])
-                        # 更新账户及订单状态
-                        with db_mysql.atomic() as transaction:
-                            AccountInfo.update(total_amount=amount).where(AccountInfo.user_no == data["user_no"]).execute()
-                            ChargeOrderInfo.update(pay_status=1, amount=blance_data["purchase"],
-                                                   power=blance_data["power"]).where(
-                                ChargeOrderInfo.order_no == data["order_no"]).execute()
-                    # 发送结帐信息
-                    charge_data = {
-                        "order_no": data["order_no"],
-                        "spear_no": order_info.spear_no,
-                        "stake_no": order_info.stake_no,
-                        "is_ok": 1
-                    }
-                    db_redis.lpush("query_charge_6107", json.dumps(charge_data))
-                result = json_result(0, {"amount": order_info.amount, "power": blance_data["power"], "status": 1})
+                result = json_result(0, blance_data)
             else:
                 result = json_result(0, {"status": 2})
             self.write(result)
@@ -588,10 +564,10 @@ class ChargeMapList(BaseRequestHandler):
 
 
 # 充电桩详情
-class ChargeStationDetails(BaseRequestHandler):
+class ChargeDetails(BaseRequestHandler):
     def get(self, *args, **kwargs):
         try:
-            data = get_cleaned_post_data(self, ["id"])
+            data = get_cleaned_query_data(self, ["id"])
             info = ChargeStation.select().where(ChargeStation.id == data["id"]).first()
             charge_details = {}
             if info:
@@ -600,6 +576,19 @@ class ChargeStationDetails(BaseRequestHandler):
             self.write(result)
         except Exception as e:
             logging.error(traceback.format_exc())
+
+# class ChargeStationDetailsHandler(BaseRequestHandler):
+#     def get(self, *args, **kwargs):
+#         try:
+#             data = get_cleaned_post_data(self, ["id"])
+#             # info = ChargeStation.select().where(ChargeStation.id == data["id"]).first()
+#             charge_details = {}
+#             # if info:
+#             #     charge_details = model_to_dict(info)
+#             result = json_result(0, {"data": charge_details})
+#             self.write(result)
+#         except Exception as e:
+#             logging.error(traceback.format_exc())
 
 
 
