@@ -9,7 +9,7 @@ from backend.redis_db import *
 from backend.mysql_model import db_mysql
 
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
-logging.basicConfig(filename='my.log', level=logging.DEBUG, format=LOG_FORMAT)
+logging.basicConfig(filename='charge_balance.log', level=logging.DEBUG, format=LOG_FORMAT)
 
 
 def charge_order_balance():
@@ -58,4 +58,5 @@ def charge_order_balance():
 
 
 if __name__ == '__main__':
+    logging.info("订单服务开启.....")
     charge_order_balance()
