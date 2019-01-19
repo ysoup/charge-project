@@ -572,27 +572,60 @@ class ChargeDetails(BaseRequestHandler):
             charge_details = {}
             if info:
                 charge_details = model_to_dict(info)
-            result = json_result(0, {"data": charge_details})
+            result = json_result(0, charge_details)
             self.write(result)
         except Exception as e:
             logging.error(traceback.format_exc())
 
-# class ChargeStationDetailsHandler(BaseRequestHandler):
-#     def get(self, *args, **kwargs):
-#         try:
-#             data = get_cleaned_post_data(self, ["id"])
-#             # info = ChargeStation.select().where(ChargeStation.id == data["id"]).first()
-#             charge_details = {}
-#             # if info:
-#             #     charge_details = model_to_dict(info)
-#             result = json_result(0, {"data": charge_details})
-#             self.write(result)
-#         except Exception as e:
-#             logging.error(traceback.format_exc())
+
+# 支付订单
+class PayOrderList(BaseRequestHandler):
+    @login_required
+    def get(self, *args, **kwargs):
+        try:
+            data = get_cleaned_query_data(self, ["user_no"])
+            info = PayOrderDetails.select().where(PayOrderDetails.user_no == data["user_no"]).\
+                order_by(PayOrderDetails.create_time.desc()).limit(10)
+            pay_ls = []
+            for x in info:
+                dic = {}
+                dic["id"] = x.id
+                dic["pay_fee"] = x.pay_fee
+                dic["pay_status"] = x.pay_status
+                dic["create_time"] = str(x.create_time)
+                pay_ls.append(dic)
+
+            result = json_result(0, pay_ls)
+            self.write(result)
+        except Exception as e:
+            logging.error(traceback.format_exc())
 
 
+# 充电订单列表
+class ChargeOrderList(BaseRequestHandler):
+    @login_required
+    def get(self, *args, **kwargs):
+        try:
+            data = get_cleaned_query_data(self, ["user_no"])
+            info = ChargeOrderInfo.select().where(ChargeOrderInfo.user_no == data["user_no"]).\
+                order_by(ChargeOrderInfo.create_time.desc()).limit(10)
+            pay_ls = []
+            for x in info:
+                dic = {}
+                dic["id"] = x.id
+                dic["amount"] = x.amount
+                dic["pay_status"] = x.pay_status
+                dic["power"] = x.power
+                dic["spear_no"] = x.spear_no
+                dic["stake_no"] = x.stake_no
+                dic["order_no"] = x.order_no
+                dic["create_time"] = str(x.create_time)
+                pay_ls.append(dic)
 
-
+            result = json_result(0, pay_ls)
+            self.write(result)
+        except Exception as e:
+            logging.error(traceback.format_exc())
 
 
 
