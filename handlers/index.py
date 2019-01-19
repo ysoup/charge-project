@@ -331,6 +331,7 @@ class ChargeStationHandler(BaseRequestHandler):
             if station_info:
                 dic = model_to_dict(station_info)
             result = json_result(0, dic)
+            logging.info("获取电桩信息:%s" % dic)
             self.write(result)
         except Exception as e:
             logging.error(traceback.format_exc())
