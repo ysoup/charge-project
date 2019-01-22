@@ -537,7 +537,7 @@ class MindRechargeHandler(BaseRequestHandler):
             amount = 0
             if account_info:
                 amount = account_info.total_amount
-            result = json_result(0, {"amount": str(amount)})
+            result = json_result(0, {"amount": amount})
             logging.info("用户余额提醒:%s" % result)
             self.write(result)
         except Exception as e:
