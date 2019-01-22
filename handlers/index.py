@@ -449,7 +449,7 @@ class ChargeDetailsHandler(BaseRequestHandler):
                 charge_details = json.loads(details_data)
                 charge_details["charge_address"] = charge_address
                 charge_details["charge_no"] = spear_no
-                ChargeDetails.create(
+                ChargeInfoDetails.create(
                     charge_no=spear_no,
                     charge_address=charge_address,
                     balance=charge_details["balance"],
@@ -463,7 +463,7 @@ class ChargeDetailsHandler(BaseRequestHandler):
                     voltage=charge_details["voltage"]
                 )
             else:
-                info = ChargeDetails.select().where(ChargeDetails.order_no == data["order_no"]).first()
+                info = ChargeInfoDetails.select().where(ChargeInfoDetails.order_no == data["order_no"]).first()
                 if info:
                     charge_details = model_to_dict(info)
             result = json_result(0, charge_details)

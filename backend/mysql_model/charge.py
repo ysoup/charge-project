@@ -17,7 +17,7 @@ class AccountInfo(BaseModel):
         table_name = 'account_info'
 
 
-class ChargeDetails(BaseModel):
+class ChargeInfoDetails(BaseModel):
     balance = CharField(null=True)
     cerrent = CharField(null=True)
     chargestate = CharField(column_name='chargeState', null=True)
