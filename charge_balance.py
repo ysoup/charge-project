@@ -45,14 +45,15 @@ def charge_order_balance():
                             db_redis.set("charge_balance_%s" % order_no, json.dumps(balance_info))
 
                             # 发送结帐信息
-                            charge_data = {
-                                "order_no": order_no,
-                                "spear_no": x.spear_no,
-                                "stake_no": x.stake_no,
-                                "is_ok": 1
-                            }
-                            db_redis.lpush("query_charge_6107", json.dumps(charge_data))
-                            logging.info("当前结帐用户:%s;订单号:%s;结帐成功" % (user_no, order_no))
+                            for i in range(0, 3):
+                                charge_data = {
+                                    "order_no": order_no,
+                                    "spear_no": x.spear_no,
+                                    "stake_no": x.stake_no,
+                                    "is_ok": 1
+                                }
+                                db_redis.lpush("query_charge_6107", json.dumps(charge_data))
+                                logging.info("当前结帐用户:%s;订单号:%s;结帐成功" % (user_no, order_no))
         except Exception as e:
             logging.error(traceback.format_exc())
 
