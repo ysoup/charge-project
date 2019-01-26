@@ -396,8 +396,7 @@ class ChargeStatusHandler(BaseRequestHandler):
                         t = time.time()
                         current_time = int(round(t * 1000))
                         current_date = datetime.datetime.now().strftime('%Y%m%d')
-                        order_no = current_date + str(current_time) + calcno_info.spear_no + calcno_info.stake_no + \
-                                   data["uid"]
+                        order_no = current_date + str(current_time) + calcno_info.spear_no + calcno_info.stake_no + "1"
                         dic["order_no"] = order_no
                         with db_mysql.atomic() as transaction:
                             ChargeOrderInfo.create(
@@ -408,7 +407,7 @@ class ChargeStatusHandler(BaseRequestHandler):
                                 stake_no=calcno_info.stake_no
                             )
                         # 发送充电命令
-                        for x in range(0, 4):
+                        for x in range(0, 2):
                             charge_data = {
                                 "order_no": order_no,
                                 "spear_no": calcno_info.spear_no,
