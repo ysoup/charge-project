@@ -215,7 +215,7 @@ def handle_request(conn):
                 db_redis.lpush("6106_charge_balance_%s" % dic["order_no"], json.dumps(dic))
 
             # 发送查询报文6104
-            data = db_redis.lpop("query_charge_6104")
+            data = db_redis.lpop("query_charge_6104_" + str(spear_no))
             if data:
                 data = str(data, encoding="utf-8")
                 send_data = json.loads(data)
@@ -274,7 +274,7 @@ def handle_request(conn):
                 print(val_6104)
 
             # 发送6105数据
-            cache_data_6105 = db_redis.lpop("query_charge_6105")
+            cache_data_6105 = db_redis.lpop("query_charge_6105_" + str(spear_no))
             if cache_data_6105:
                 data_6105 = str(cache_data_6105, encoding="utf-8")
                 send_data_6105 = json.loads(data_6105)
@@ -308,11 +308,11 @@ def handle_request(conn):
 
                 logging.info("6105发送的报文::" + new_ret)
                 tmp_ret_6105 = binascii.unhexlify(new_ret)
-                val_6105 = conn.send(tmp_ret_6105)
-
+                for i in range(0, 8):
+                    val_6105 = conn.send(tmp_ret_6105)
                 logging.info("6105发送成功")
 
-            cache_data_6106 = db_redis.lpop("query_charge_6106")
+            cache_data_6106 = db_redis.lpop("query_charge_6106_" + str(spear_no))
             if cache_data_6106:
                 data_6106 = str(cache_data_6106, encoding="utf-8")
                 send_data_6106 = json.loads(data_6106)
@@ -342,7 +342,7 @@ def handle_request(conn):
                 val_6106 = conn.send(tmp_ret_6106)
                 logging.info("6106发送成功")
 
-            cache_data_6107 = db_redis.lpop("query_charge_6107")
+            cache_data_6107 = db_redis.lpop("query_charge_6107_" + str(spear_no))
             if cache_data_6107:
                 data_6107 = str(cache_data_6107, encoding="utf-8")
                 send_data_6107 = json.loads(data_6107)
@@ -374,6 +374,34 @@ def handle_request(conn):
                 tmp_ret_6107 = binascii.unhexlify(new_ret)
                 val_6107 = conn.send(tmp_ret_6107)
                 logging.info("6107发送成功")
+            cache_data_610a = db_redis.lpop("query_charge_610a")
+            if cache_data_610a:
+                data_610a = str(cache_data_610a, encoding="utf-8")
+                send_data_610a = json.loads(data_610a)
+
+                pkglen = hex(50).replace("0x", "")
+                pkglen = "00" + pkglen
+                pkglen = "".join(list(reversed([pkglen[i:i + 2] for i in range(0, len(pkglen), 2)])))
+
+                query_no = "610a"
+                akg_id = "".join(list(reversed([query_no[i:i + 2] for i in range(0, len(query_no), 2)])))
+
+                spear_no = hex(int(send_data_610a["spear_no"])).replace("0x", "")
+                spear_no = "0000" + spear_no
+                spear_no = "".join(list(reversed([spear_no[i:i + 2] for i in range(0, len(spear_no), 2)])))
+                stake_no = "0000000" + send_data_610a["stake_no"]
+                stake_no = "".join(list(reversed([stake_no[i:i + 2] for i in range(0, len(stake_no), 2)])))
+                uuid = stake_no + spear_no
+
+                is_ok = hex(int(send_data_610a["is_ok"])).replace("0x", "")
+                is_ok = new_append_num(is_ok, 8)
+                is_ok = "".join(list(reversed([is_ok[i:i + 2] for i in range(0, len(is_ok), 2)])))
+                new_ret = "f89ab68e" + pkglen + akg_id + uuid + is_ok
+
+                logging.info("610a发送的报文:" + new_ret)
+                tmp_ret_6107 = binascii.unhexlify(new_ret)
+                val_6107 = conn.send(tmp_ret_6107)
+                logging.info("610a发送成功")
     # 如果出现异常就打印异常
     except Exception as ex:
         logging.error(traceback.format_exc())
@@ -383,8 +411,4 @@ def handle_request(conn):
 
 
 if __name__ == '__main__':
-    server(8500)
-
-
-
-
+    server(7500)

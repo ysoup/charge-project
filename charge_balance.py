@@ -52,7 +52,7 @@ def charge_order_balance():
                                     "stake_no": x.stake_no,
                                     "is_ok": 1
                                 }
-                                db_redis.lpush("query_charge_6107", json.dumps(charge_data))
+                                db_redis.lpush("query_charge_6107_" + str(x.spear_no), json.dumps(charge_data))
                                 logging.info("当前结帐用户:%s;订单号:%s;结帐成功" % (user_no, order_no))
         except Exception as e:
             logging.error(traceback.format_exc())

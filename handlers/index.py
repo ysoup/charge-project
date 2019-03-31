@@ -361,7 +361,7 @@ class ChargeStationHandler(BaseRequestHandler):
                     "amount": str(amount).split(".")[0],
                     "price": "150"
                 }
-                db_redis.lpush("query_charge_6104", json.dumps(charge_data))
+                db_redis.lpush("query_charge_6104_" + str(data["spear_no"]), json.dumps(charge_data))
             UserCalcnoInfo.create(
                 calc_no=calcno,
                 user_no=data["user_no"],
@@ -415,7 +415,7 @@ class ChargeStatusHandler(BaseRequestHandler):
                                 "uid": data["uid"],
                                 "is_can_begin": "1"
                             }
-                            db_redis.lpush("query_charge_6105", json.dumps(charge_data))
+                            db_redis.lpush("query_charge_6105_" + str(calcno_info.spear_no), json.dumps(charge_data))
                 else:
                     # 不可以充电
                     dic["status"] = 2
@@ -488,7 +488,7 @@ class ChargeEndHandler(BaseRequestHandler):
                     "spear_no": order_info.spear_no,
                     "stake_no": order_info.stake_no,
                 }
-                db_redis.lpush("query_charge_6106", json.dumps(charge_data))
+                db_redis.lpush("query_charge_6106_" + str(order_info.spear_no), json.dumps(charge_data))
                 dic["status"] = 1
             result = json_result(0, dic)
             self.write(result)
